@@ -1,0 +1,19 @@
+plugin: aws_ssm
+# Use the AWS SSM inventory plugin to discover instances
+
+regions:
+  - us-east-1
+# Scan this region for managed instances
+
+filters:
+  instance-state-name: running
+# Include only running instances
+
+hostnames:
+  - instance-id
+# Use the EC2 instance ID as the hostname
+
+groups:
+  web_servers: "'web' in tags.Role"
+# Instances tagged with Role=web are placed in the web_servers group
+# Tag your EC2 instances: Key=Role, Value=web
