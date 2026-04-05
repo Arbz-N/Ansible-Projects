@@ -11,7 +11,7 @@ filters:
 
 hostnames:
   - instance-id
-# Use the EC2 instance ID as the hostname
+# Use the EC2 instance ID as the hostname"
 
 groups:
   web_servers: "'web' in tags.Role"
