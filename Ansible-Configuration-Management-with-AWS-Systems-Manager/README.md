@@ -62,7 +62,7 @@
     sudo snap install amazon-ssm-agent --classic
     sudo snap start amazon-ssm-agent
 
-### Task 2 — Install Ansible on the Control Node:
+### Task 2 — Install Ansible on the Control Node
     
     # Ubuntu / Debian
     sudo apt update
