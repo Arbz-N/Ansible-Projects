@@ -46,7 +46,7 @@
     - name: restart nginx
       service:
         name: nginx
-        state: restarted
+        state: restarted:
       # Gracefully restart Nginx to apply the new configuration
 
 
