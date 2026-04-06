@@ -1,44 +1,20 @@
 ---
 - name: Create RDS database instance
   hosts: localhost
-  # ↑ localhost = is hi machine se AWS call hogi
   connection: local
-  # ↑ local = SSH nahi, local Python/boto3 se call
   collections:
     - amazon.aws
-  # ↑ amazon.aws collection ke modules use karenge
-
   tasks:
-
-    # Task 1: RDS Instance Create Karo
     - name: Create RDS instance
       amazon.aws.rds_instance:
         state: present
-        # ↑ present = create karo agar nahi hai
-        # ↑ absent  = delete karo agar hai
-        # ↑ Idempotent — dobara chalao to kuch nahi hoga ✅
-
         region: "us-east-1"
-        # ↑ APNA REGION LIKHEIN
-
         engine: "mysql"
-        # ↑ Database engine
-        # ↑ Options: mysql, postgres, oracle-se1, sqlserver-se
-
         db_instance_identifier: "my-rds"
-        # ↑ RDS instance ka unique naam
 
         db_instance_class: "db.t3.micro"
-        # ↑ Instance size (db.m5.large expensive hai — lab ke liye t3.micro)
-        # ↑ db.t3.micro = Free Tier eligible ✅
-
         allocated_storage: 20
-        # ↑ Storage in GB (20 = minimum, Free Tier)
-        # ↑ Original: 400 — lab ke liye 20 use karo
-
         master_username: "admin"
-        # ↑ Master database username
-
         master_user_password: "NewPassword123!"
         # ↑ Strong password — 8+ chars, uppercase, number, special ✅
         # ↑ ⚠️ Production mein: Ansible Vault se encrypt karo
