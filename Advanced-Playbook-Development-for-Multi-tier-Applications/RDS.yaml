@@ -11,40 +11,20 @@
         region: "us-east-1"
         engine: "mysql"
         db_instance_identifier: "my-rds"
-
         db_instance_class: "db.t3.micro"
         allocated_storage: 20
         master_username: "admin"
         master_user_password: "NewPassword123!"
-        # ↑ Strong password — 8+ chars, uppercase, number, special ✅
-        # ↑ ⚠️ Production mein: Ansible Vault se encrypt karo
-
         publicly_accessible: false
-        # ↑ Private rakho — best practice ✅
-
         skip_final_snapshot: true
-        # ↑ Delete karte waqt snapshot mat lo (lab ke liye)
-
       register: rds_result
-      # ↑ register = output save karo variable mein
-
-    # Task 2: RDS Endpoint Print Karo
     - name: Print RDS endpoint
       debug:
         msg: "RDS Endpoint: {{ rds_result.endpoint.address }}"
-      # ↑ debug module = variable print karo
-      # ↑ rds_result.endpoint.address = RDS ka hostname
-
-    # Task 3: RDS Available Hone Ka Wait Karo
     - name: Wait for RDS instance to become available
       wait_for:
         host: "{{ rds_result.endpoint.address }}"
-        # ↑ RDS ka DNS naam
         port: 3306
-        # ↑ MySQL ka port
         state: started
-        # ↑ Port open hone ka wait karo
         timeout: 300
-        # ↑ 300 seconds (5 minutes) wait karo max
       when: rds_result.endpoint is defined
-      # ↑ Sirf tab wait karo jab endpoint mile
