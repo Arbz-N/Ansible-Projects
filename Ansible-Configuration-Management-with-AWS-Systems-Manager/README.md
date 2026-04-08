@@ -50,3 +50,10 @@ Project Structure:
     |
     |-- README.md
 
+Prerequisites:
+
+    - AWS Account with IAM admin access
+    - Permission to launch 3 EC2 instances
+    - AWS CLI configured on local machine (for verification only)
+
+
