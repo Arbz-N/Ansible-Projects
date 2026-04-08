@@ -1,0 +1,78 @@
+---
+# site.yml
+# Run this playbook from ansible-control-node only
+# Targets: web-server-01 and web-server-02 (discovered via SSM inventory)
+
+- name: Install and Configure Nginx on Web Servers
+  hosts: all
+  # all = every host in the SSM inventory = web-server-01 + web-server-02
+
+  become: true
+  # Use sudo on target nodes — required for package install and service management
+
+  connection: aws_ssm
+  # Connect via SSM — no SSH or open port 22 needed
+
+  vars:
+    nginx_port: 80
+
+  tasks:
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+      # apt module targets Ubuntu/Debian
+      # state: present installs only if not already installed (idempotent)
+      # update_cache: yes runs apt-get update before installing
+      tags: install
+
+    - name: Start and enable Nginx service
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+      # state: started ensures the service is running now
+      # enabled: yes ensures it starts automatically after reboot
+      tags: service
+
+    - name: Deploy custom Nginx configuration
+      copy:
+        src: files/nginx.conf
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
+        mode: '0644'
+      # src is the path on the control node
+      # dest is the path on the target instance
+      notify:
+        - restart nginx
+      # The handler runs only if this task makes an actual change
+      tags: configure
+
+    - name: Deploy custom index page
+      copy:
+        content: |
+          <html><body>
+            <h1>Deployed by Ansible</h1>
+            <p>Server: {{ inventory_hostname }}</p>
+          </body></html>
+        dest: /var/www/html/index.html
+      # inventory_hostname resolves to the EC2 instance ID
+      tags: configure
+
+    - name: Verify Nginx is responding
+      uri:
+        url: "http://localhost:{{ nginx_port }}"
+        status_code: 200
+      # Confirms Nginx is returning HTTP 200 before the play ends
+      tags: verify
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+      # Runs at the end of the play, and only when notified by a task
+      # Will not run if the config file was unchanged
