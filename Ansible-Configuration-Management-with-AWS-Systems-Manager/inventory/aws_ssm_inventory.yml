@@ -1,19 +1,21 @@
-plugin: aws_ssm
-# Use the AWS SSM inventory plugin to discover instances
+plugin: amazon.aws.aws_ssm
+# Discover instances registered in AWS SSM Fleet Manager
 
 regions:
-  - us-east-1
-# Scan this region for managed instances
+  - your-region
+# Replace with your actual region (e.g. us-east-1)
 
 filters:
-  instance-state-name: running
-# Include only running instances
+  tag:Environment: production
+# Only include instances tagged with Environment=production
+# web-server-01 and web-server-02 will be picked up
+# ansible-control-node is excluded (no Environment tag)
 
 hostnames:
   - instance-id
-# Use the EC2 instance ID as the hostname
+# Use the EC2 instance ID as the Ansible hostname
 
-groups:
-  web_servers: "'web' in tags.Role"
-# Instances tagged with Role=web are placed in the web_servers group
-# Tag your EC2 instances: Key=Role, Value=web
+compose:
+  ansible_host: instance_id
+  ansible_connection: aws_ssm
+# Connect via SSM — no SSH required
