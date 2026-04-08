@@ -78,3 +78,40 @@ Task 1 — Create IAM Roles:
     
     → Create role
 
+Task 2 — Launch 3 EC2 Instances:
+
+    Instance 1: ansible-control-node
+    EC2 → Launch Instance
+    
+      Name:            ansible-control-node
+      AMI:             Ubuntu Server 22.04 LTS
+      Instance type:   t2.micro
+      Key pair:        your-key-pair
+      Security group:  Allow inbound TCP port 22
+      IAM role:        AnsibleControlRole
+    
+      Tags:
+        Name = ansible-control-node
+        Role = control
+    Instance 2: web-server-01
+      Name:            web-server-01
+      AMI:             Ubuntu Server 22.04 LTS
+      Instance type:   t2.micro
+      Security group:  Allow inbound TCP port 80
+      IAM role:        AnsibleTargetRole
+    
+      Tags:
+        Name        = web-server-01
+        Environment = production
+        Role        = webserver
+    Instance 3: web-server-02
+      Name:            web-server-02
+      AMI:             Ubuntu Server 22.04 LTS
+      Instance type:   t2.micro
+      Security group:  Allow inbound TCP port 80
+      IAM role:        AnsibleTargetRole
+    
+      Tags:
+        Name        = web-server-02
+        Environment = production
+        Role        = webserver
