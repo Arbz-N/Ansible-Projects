@@ -56,4 +56,25 @@ Prerequisites:
     - Permission to launch 3 EC2 instances
     - AWS CLI configured on local machine (for verification only)
 
+Task 1 — Create IAM Roles:
+
+    Role 1: AnsibleTargetRole (for web-server-01 and web-server-02)
+    IAM → Roles → Create role
+    
+      Trusted entity: AWS service → EC2
+      Policy:         AmazonSSMManagedInstanceCore
+      Role name:      AnsibleTargetRole
+    
+    → Create role
+
+    Role 2: AnsibleControlRole (for ansible-control-node)
+    IAM → Roles → Create role
+
+      Trusted entity: AWS service → EC2
+      Policies:
+        - AmazonSSMFullAccess         (to run SSM commands)
+        - AmazonEC2ReadOnlyAccess     (to list EC2 instances for inventory)
+      Role name:      AnsibleControlRole
+    
+    → Create role
 
