@@ -225,4 +225,17 @@ Task 7 — Verify
     Systems Manager → Run Command → Command History
     Both targets should show Success with a 2/2 completion count.
 
+Key Concepts
+
+    Why SSM instead of SSH
+    SSM does not require port 22 to be open. The SSM Agent on each target instance maintains an outbound HTTPS connection to the SSM service. Ansible sends commands through this channel, which is more secure and eliminates the need to distribute SSH private keys.
+    
+    Dynamic inventory with tags
+    The aws_ssm.yml inventory file filters instances by the Environment=production tag. Only web-server-01 and web-server-02 match — the control node is excluded automatically because it has no Environment tag.
+    
+    Handlers
+    The restart nginx handler runs at the end of the play and only when the config file copy task makes a change. If the configuration file on the target is already identical to files/nginx.conf, the copy task reports ok (not changed), the handler is never notified, and Nginx is not restarted unnecessarily.
+    
+    Task tags
+    Tags allow running a subset of tasks without modifying the playbook. For example, --tags verify runs only the URI check task, which is useful for confirming the state of already-configured servers without reinstalling or reconfiguring anything.
 
