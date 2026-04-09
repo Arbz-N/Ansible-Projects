@@ -115,3 +115,17 @@ Task 2 — Launch 3 EC2 Instances:
         Name        = web-server-02
         Environment = production
         Role        = webserver
+
+
+Task 3 — Register Target Nodes in SSM Fleet Manager
+
+    SSH into each web server and verify the SSM agent:
+    ssh -i your-key.pem ubuntu@<web-server-public-ip>
+    
+    sudo systemctl status amazon-ssm-agent
+    # Should show: Active (running)
+    
+    # If not running:
+    sudo snap install amazon-ssm-agent --classic
+    sudo systemctl start amazon-ssm-agent
+    sudo systemctl enable amazon-ssm-agent
