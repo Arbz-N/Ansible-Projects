@@ -129,3 +129,10 @@ Task 3 — Register Target Nodes in SSM Fleet Manager
     sudo snap install amazon-ssm-agent --classic
     sudo systemctl start amazon-ssm-agent
     sudo systemctl enable amazon-ssm-agent
+
+    Verify in the console:
+    Systems Manager → Fleet Manager
+    Both web-server-01 and web-server-02 should appear with status Online.
+    Note the instance IDs for both web servers — you will need them for --limit commands.
+
+
