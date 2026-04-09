@@ -135,4 +135,17 @@ Task 3 — Register Target Nodes in SSM Fleet Manager
     Both web-server-01 and web-server-02 should appear with status Online.
     Note the instance IDs for both web servers — you will need them for --limit commands.
 
+Task 4 — Set Up the Control Node
 
+    SSH into ansible-control-node:
+    ssh -i your-key.pem ubuntu@<control-node-public-ip>
+    Install dependencies:
+    sudo apt update -y && sudo apt upgrade -y
+    sudo apt install ansible python3-pip awscli -y
+    pip3 install boto3 botocore
+    ansible-galaxy collection install amazon.aws
+    
+    ansible --version
+    python3 --version
+    aws sts get-caller-identity
+    # AnsibleControlRole should appear in the output
