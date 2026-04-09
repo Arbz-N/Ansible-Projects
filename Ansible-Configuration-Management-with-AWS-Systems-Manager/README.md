@@ -211,4 +211,18 @@ Selective execution
 
 Task 7 — Verify
 
+    From the control node
+    ansible all -m command -a "systemctl status nginx"
+    ansible all -m command -a "nginx -t"
+    ansible all -m command -a "curl -s http://localhost"
+
+    From the browser
+    http://<web-server-01-public-ip>
+    http://<web-server-02-public-ip>
+    Each page displays the server's instance ID confirming which node served the response.
+
+    From the AWS console
+    Systems Manager → Run Command → Command History
+    Both targets should show Success with a 2/2 completion count.
+
 
