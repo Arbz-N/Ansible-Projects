@@ -187,3 +187,28 @@ Task 6 — Run the Playbook
     # --check: simulate without making changes
     # --diff:  show what would change
 
+
+    Full run
+    ansible-playbook site.yml
+    Expected output:
+    PLAY RECAP
+    i-0abc123... : ok=5 changed=4 unreachable=0 failed=0   (web-server-01)
+    i-0def456... : ok=5 changed=4 unreachable=0 failed=0   (web-server-02)
+
+
+Selective execution
+
+    # Target a single server
+    ansible-playbook site.yml --limit "i-0abc123..."
+    
+    # Run specific task groups only
+    ansible-playbook site.yml --tags install
+    ansible-playbook site.yml --tags configure
+    ansible-playbook site.yml --tags verify
+    
+    # Verbose debug output
+    ansible-playbook site.yml -vvv
+
+Task 7 — Verify
+
+
