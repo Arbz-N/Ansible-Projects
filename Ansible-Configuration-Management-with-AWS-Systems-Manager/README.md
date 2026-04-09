@@ -160,4 +160,30 @@ Task 4 — Set Up the Control Node
       --query 'Reservations[].Instances[].[InstanceId,Tags[?Key==`Name`].Value|[0]]' \
       --output table
 
+Task 5 — Set Up Ansible Project
+    
+    mkdir -p ~/ansible-ssm-lab/{inventory,files}
+    cd ~/ansible-ssm-lab
+     Copy all files from this project into ~/ansible-ssm-lab/, maintaining the directory structure shown in the project structure section.
+
+Test inventory discovery:
+
+    ansible-inventory -i inventory/aws_ssm.yml --graph
+    
+    # Expected:
+    # @all:
+    #   |--@ungrouped:
+    #   |  |--i-0abc123...   (web-server-01)
+    #   |  |--i-0def456...   (web-server-02)
+
+    Test connectivity:
+    ansible all -m ping
+    # Both instances should return: "ping": "pong"
+
+Task 6 — Run the Playbook
+
+    Dry run first
+    ansible-playbook site.yml --check --diff
+    # --check: simulate without making changes
+    # --diff:  show what would change
 
