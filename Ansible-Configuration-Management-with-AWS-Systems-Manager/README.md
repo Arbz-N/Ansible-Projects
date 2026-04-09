@@ -148,4 +148,16 @@ Task 4 — Set Up the Control Node
     ansible --version
     python3 --version
     aws sts get-caller-identity
+
     # AnsibleControlRole should appear in the output
+    
+    Set your region:
+
+    aws configure set region your-region
+    Verify target instances are visible:
+    aws ec2 describe-instances \
+      --filters "Name=tag:Environment,Values=production" \
+      --query 'Reservations[].Instances[].[InstanceId,Tags[?Key==`Name`].Value|[0]]' \
+      --output table
+
+
