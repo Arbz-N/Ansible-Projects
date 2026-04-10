@@ -180,7 +180,7 @@ Test inventory discovery:
     ansible all -m ping
     # Both instances should return: "ping": "pong"
 
-Task 6 — Run the Playbook
+Task 6 — Run the Playbook:
 
     Dry run first
     ansible-playbook site.yml --check --diff
@@ -196,7 +196,7 @@ Task 6 — Run the Playbook
     i-0def456... : ok=5 changed=4 unreachable=0 failed=0   (web-server-02)
 
 
-Selective execution
+Selective execution:
 
     # Target a single server
     ansible-playbook site.yml --limit "i-0abc123..."
@@ -209,7 +209,7 @@ Selective execution
     # Verbose debug output
     ansible-playbook site.yml -vvv
 
-Task 7 — Verify
+Task 7 — Verify:
 
     From the control node
     ansible all -m command -a "systemctl status nginx"
@@ -225,7 +225,7 @@ Task 7 — Verify
     Systems Manager → Run Command → Command History
     Both targets should show Success with a 2/2 completion count.
 
-Key Concepts
+Key Concepts:
 
     Why SSM instead of SSH
     SSM does not require port 22 to be open. The SSM Agent on each target instance maintains an outbound HTTPS connection to the SSM service. Ansible sends commands through this channel, which is more secure and eliminates the need to distribute SSH private keys.
