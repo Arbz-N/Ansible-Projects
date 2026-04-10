@@ -117,7 +117,7 @@ Task 2 — Launch 3 EC2 Instances:
         Role        = webserver
 
 
-Task 3 — Register Target Nodes in SSM Fleet Manager
+Task 3 — Register Target Nodes in SSM Fleet Manager:
 
     SSH into each web server and verify the SSM agent:
     ssh -i your-key.pem ubuntu@<web-server-public-ip>
@@ -135,7 +135,7 @@ Task 3 — Register Target Nodes in SSM Fleet Manager
     Both web-server-01 and web-server-02 should appear with status Online.
     Note the instance IDs for both web servers — you will need them for --limit commands.
 
-Task 4 — Set Up the Control Node
+Task 4 — Set Up the Control Node:
 
     SSH into ansible-control-node:
     ssh -i your-key.pem ubuntu@<control-node-public-ip>
@@ -160,7 +160,7 @@ Task 4 — Set Up the Control Node
       --query 'Reservations[].Instances[].[InstanceId,Tags[?Key==`Name`].Value|[0]]' \
       --output table
 
-Task 5 — Set Up Ansible Project
+Task 5 — Set Up Ansible Project:
     
     mkdir -p ~/ansible-ssm-lab/{inventory,files}
     cd ~/ansible-ssm-lab
