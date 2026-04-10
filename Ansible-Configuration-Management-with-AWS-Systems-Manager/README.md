@@ -241,24 +241,31 @@ Key Concepts
 
 
 Cleanup:
-Remove Nginx from target nodes
-bash# Run from ansible-control-node
-ansible all -m apt -a "name=nginx state=absent purge=yes" --become
-Remove lab files
-rm -rf ~/ansible-ssm-lab
-Terminate EC2 instances
-EC2 → Instances → Select all three → Instance State → Terminate
-Use Terminate, not Stop — stopped instances still incur EBS storage charges.
-Delete IAM roles
-aws iam detach-role-policy \
-  --role-name AnsibleTargetRole \
-  --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-aws iam delete-role --role-name AnsibleTargetRole
 
-aws iam detach-role-policy \
-  --role-name AnsibleControlRole \
-  --policy-arn arn:aws:iam::aws:policy/AmazonSSMFullAccess
-aws iam detach-role-policy \
-  --role-name AnsibleControlRole \
-  --policy-arn arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
-aws iam delete-role --role-name AnsibleControlRole
+    Remove Nginx from target nodes
+    bash# Run from ansible-control-node
+    ansible all -m apt -a "name=nginx state=absent purge=yes" --become
+
+    Remove lab files
+    rm -rf ~/ansible-ssm-lab
+    Terminate EC2 instances
+    EC2 → Instances → Select all three → Instance State → Terminate
+    Use Terminate, not Stop — stopped instances still incur EBS storage charges.
+
+    Delete IAM roles
+    aws iam detach-role-policy \
+      --role-name AnsibleTargetRole \
+      --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+    aws iam delete-role --role-name AnsibleTargetRole
+    
+    aws iam detach-role-policy \
+      --role-name AnsibleControlRole \
+      --policy-arn arn:aws:iam::aws:policy/AmazonSSMFullAccess
+    aws iam detach-role-policy \
+      --role-name AnsibleControlRole \
+      --policy-arn arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
+    aws iam delete-role --role-name AnsibleControlRole
+
+Licensee:
+
+    MIT License
