@@ -1,4 +1,4 @@
-Ansible-Configuration-Management-with-AWS-Systems-Manager
+# Ansible-Configuration-Management-with-AWS-Systems-Manager
 
     Overview
     This project demonstrates running Ansible playbooks over AWS Systems Manager (SSM) without opening SSH port 22. A control node discovers target instances dynamically via the SSM inventory plugin, and deploys Nginx to both web servers through SSM Run Command.
@@ -11,7 +11,7 @@ Ansible-Configuration-Management-with-AWS-Systems-Manager
     Handler triggers Nginx restart only when the config file actually changes
     Tags on playbook tasks allow selective execution (--tags install, --tags verify)
 
-Architecture:
+## Architecture:
 
         [Local Machine]
               |
@@ -35,7 +35,7 @@ Architecture:
         Nginx installed      Nginx installed
         port 80 open         port 80 open
 
-Project Structure:
+## Project Structure:
 
     Ansible-Configuration-Management-with-AWS-Systems-Manager/
     |
@@ -50,13 +50,13 @@ Project Structure:
     |
     |-- README.md
 
-Prerequisites:
+## Prerequisites:
 
     - AWS Account with IAM admin access
     - Permission to launch 3 EC2 instances
     - AWS CLI configured on local machine (for verification only)
 
-Task 1 — Create IAM Roles:
+### Task 1 — Create IAM Roles:
 
     Role 1: AnsibleTargetRole (for web-server-01 and web-server-02)
     IAM → Roles → Create role
@@ -78,7 +78,7 @@ Task 1 — Create IAM Roles:
     
     → Create role
 
-Task 2 — Launch 3 EC2 Instances:
+### Task 2 — Launch 3 EC2 Instances:
 
     Instance 1: ansible-control-node
     EC2 → Launch Instance
@@ -117,7 +117,7 @@ Task 2 — Launch 3 EC2 Instances:
         Role        = webserver
 
 
-Task 3 — Register Target Nodes in SSM Fleet Manager:
+### Task 3 — Register Target Nodes in SSM Fleet Manager:
 
     SSH into each web server and verify the SSM agent:
     ssh -i your-key.pem ubuntu@<web-server-public-ip>
@@ -135,7 +135,7 @@ Task 3 — Register Target Nodes in SSM Fleet Manager:
     Both web-server-01 and web-server-02 should appear with status Online.
     Note the instance IDs for both web servers — you will need them for --limit commands.
 
-Task 4 — Set Up the Control Node:
+### Task 4 — Set Up the Control Node:
 
     SSH into ansible-control-node:
     ssh -i your-key.pem ubuntu@<control-node-public-ip>
@@ -160,13 +160,13 @@ Task 4 — Set Up the Control Node:
       --query 'Reservations[].Instances[].[InstanceId,Tags[?Key==`Name`].Value|[0]]' \
       --output table
 
-Task 5 — Set Up Ansible Project:
+### Task 5 — Set Up Ansible Project:
     
     mkdir -p ~/ansible-ssm-lab/{inventory,files}
     cd ~/ansible-ssm-lab
      Copy all files from this project into ~/ansible-ssm-lab/, maintaining the directory structure shown in the project structure section.
 
-Test inventory discovery:
+### Test inventory discovery:
 
     ansible-inventory -i inventory/aws_ssm.yml --graph
     
@@ -180,7 +180,7 @@ Test inventory discovery:
     ansible all -m ping
     # Both instances should return: "ping": "pong"
 
-Task 6 — Run the Playbook:
+### Task 6 — Run the Playbook:
 
     Dry run first
     ansible-playbook site.yml --check --diff
@@ -196,7 +196,7 @@ Task 6 — Run the Playbook:
     i-0def456... : ok=5 changed=4 unreachable=0 failed=0   (web-server-02)
 
 
-Selective execution:
+### Selective execution:
 
     # Target a single server
     ansible-playbook site.yml --limit "i-0abc123..."
