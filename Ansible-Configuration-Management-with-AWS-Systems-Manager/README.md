@@ -209,7 +209,7 @@
     # Verbose debug output
     ansible-playbook site.yml -vvv
 
-Task 7 — Verify:
+### Task 7 — Verify:
 
     From the control node
     ansible all -m command -a "systemctl status nginx"
@@ -225,7 +225,7 @@ Task 7 — Verify:
     Systems Manager → Run Command → Command History
     Both targets should show Success with a 2/2 completion count.
 
-Key Concepts:
+### Key Concepts:
 
     Why SSM instead of SSH
     SSM does not require port 22 to be open. The SSM Agent on each target instance maintains an outbound HTTPS connection to the SSM service. Ansible sends commands through this channel, which is more secure and eliminates the need to distribute SSH private keys.
@@ -240,7 +240,7 @@ Key Concepts:
     Tags allow running a subset of tasks without modifying the playbook. For example, --tags verify runs only the URI check task, which is useful for confirming the state of already-configured servers without reinstalling or reconfiguring anything.
 
 
-Cleanup:
+### Cleanup:
 
     Remove Nginx from target nodes
     bash# Run from ansible-control-node
@@ -266,6 +266,6 @@ Cleanup:
       --policy-arn arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
     aws iam delete-role --role-name AnsibleControlRole
 
-Licensee:
+### Licensee:
 
     MIT License
