@@ -151,7 +151,7 @@
 
     # AnsibleControlRole should appear in the output
     
-    Set your region:
+    Set your region
 
     aws configure set region your-region
     Verify target instances are visible:
