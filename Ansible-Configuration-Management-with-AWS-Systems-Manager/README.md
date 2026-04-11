@@ -266,6 +266,6 @@
       --policy-arn arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
     aws iam delete-role --role-name AnsibleControlRole
 
-### Licensee:
+### License:
 
     This project is licensed under the MIT License.
