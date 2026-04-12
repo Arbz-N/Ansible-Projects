@@ -1,30 +1,69 @@
 ---
+# RDS.yaml
+# Create an AWS RDS MySQL instance using Ansible and the amazon.aws collection
+
 - name: Create RDS database instance
   hosts: localhost
+  # AWS API calls are made from this machine using boto3
   connection: local
+  # local = no SSH — uses the local Python environment
   collections:
     - amazon.aws
+
   tasks:
+
     - name: Create RDS instance
       amazon.aws.rds_instance:
         state: present
-        region: "us-east-1"
+        # present = create if it does not exist
+        # absent  = delete if it exists
+        # Idempotent — running again when already created makes no changes
+
+        region: "your-region"
+        # Replace with your actual region (e.g. us-east-1)
+
         engine: "mysql"
+        # Options: mysql, postgres, oracle-se1, sqlserver-se
+
         db_instance_identifier: "my-rds"
+        # Unique name for the RDS instance
+
         db_instance_class: "db.t3.micro"
+        # db.t3.micro is Free Tier eligible
+        # Use db.m5.large or larger for production workloads
+
         allocated_storage: 20
+        # Storage in GB — 20 is the minimum and is Free Tier eligible
+
         master_username: "admin"
-        master_user_password: "NewPassword123!"
+        # Master database username
+
+        master_user_password: "your-strong-password"
+        # Replace with a strong password (8+ chars, upper, number, special)
+        # In production: use Ansible Vault to encrypt this value
+
         publicly_accessible: false
+        # Keep the instance private — best practice for production
+
         skip_final_snapshot: true
+        # Do not create a final snapshot when deleting — acceptable for lab use
+
       register: rds_result
+      # Save the task output to rds_result for use in subsequent tasks
+
     - name: Print RDS endpoint
       debug:
         msg: "RDS Endpoint: {{ rds_result.endpoint.address }}"
+      # Prints the hostname needed to connect to the database
+
     - name: Wait for RDS instance to become available
       wait_for:
         host: "{{ rds_result.endpoint.address }}"
         port: 3306
+        # MySQL default port
         state: started
+        # Wait until port 3306 is accepting connections
         timeout: 300
+        # Give up after 5 minutes
       when: rds_result.endpoint is defined
+      # Only run this task if an endpoint was returned
