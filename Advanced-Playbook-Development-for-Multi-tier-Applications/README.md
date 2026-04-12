@@ -1,36 +1,32 @@
 # AnsibleRDSLab — AWS RDS MySQL Provisioning with Ansible
 
-[![Ansible](https://img.shields.io/badge/Ansible-2.x-EE0000?logo=ansible)](https://www.ansible.com/)
-[![AWS](https://img.shields.io/badge/AWS-RDS-FF9900?logo=amazonaws)](https://aws.amazon.com/rds/)
-[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
----
 
 ## Overview
 
-This project provisions an **AWS RDS MySQL** instance using Ansible and the `amazon.aws` collection. The playbook runs on `localhost` using boto3 to make AWS API calls — no target EC2 instance is required. A separate delete playbook handles teardown.
+    This project provisions an **AWS RDS MySQL** instance using Ansible and the `amazon.aws` collection.
+    The playbook runs on `localhost` using boto3 to make AWS API calls — no target EC2 instance is required.
+    A separate delete playbook handles teardown.
 
-Key highlights:
-- `connection: local` — Ansible calls AWS API directly from the control machine
-- `amazon.aws.rds_instance` module handles create and delete idempotently
-- `state: present` creates the instance only if it does not already exist
-- `register` captures the endpoint address for downstream tasks
-- `wait_for` blocks until MySQL port 3306 is accepting connections
-- A dedicated `RDS-delete.yaml` playbook cleanly removes the instance
+    Key highlights:
+     - `connection: local` — Ansible calls AWS API directly from the control machine
+     - `amazon.aws.rds_instance` module handles create and delete idempotently
+     - `state: present` creates the instance only if it does not already exist
+     - `register` captures the endpoint address for downstream tasks
+     - `wait_for` blocks until MySQL port 3306 is accepting connections
+     - A dedicated `RDS-delete.yaml` playbook cleanly removes the instance
 
----
+
 
 ## Project Structure
 
-```
-AnsibleRDSLab/
-|
-|-- RDS.yaml            # Playbook — create RDS MySQL instance
-|-- RDS-delete.yaml     # Playbook — delete RDS MySQL instance
-|
-|-- README.md
-```
+
+    Advanced-Playbook-Development-for-Multi-tier-Applications/
+    |
+    |-- RDS.yaml            # Playbook — create RDS MySQL instance
+    |-- RDS-delete.yaml     # Playbook — delete RDS MySQL instance
+    |
+    |-- README.md
+
 
 ---
 
