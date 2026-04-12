@@ -28,85 +28,82 @@
     |-- README.md
 
 
----
+
 
 ## Prerequisites
 
-| Requirement | Check |
-|---|---|
-| Python 3.8+ | `python3 --version` |
-| pip | `pip3 --version` |
-| Ansible 2.x | `ansible --version` |
-| AWS CLI | `aws sts get-caller-identity` |
-
----
+    Requirement         Check 
+    
+    Python 3.8+         python3 --version
+    pip                 pip3 --version 
+    Ansible 2.x         ansible --version
+    AWS CLI             aws sts get-caller-identity
 
 ## Architecture
 
-```
-Local Machine (control node)
-        |
-        | ansible-playbook RDS.yaml
-        | connection: local
-        | boto3 → AWS API
-        v
-AWS RDS Service
-        |
-        v
-RDS MySQL Instance (my-rds)
-  engine:    mysql
-  class:     db.t3.micro
-  storage:   20 GB
-  port:      3306
-  public:    false
-```
+    Local Machine (control node)
+            |
+            | ansible-playbook RDS.yaml
+            | connection: local
+            | boto3 → AWS API
+            v
+    AWS RDS Service
+            |
+            v
+    RDS MySQL Instance (my-rds)
+      engine:    mysql
+      class:     db.t3.micro
+      storage:   20 GB
+      port:      3306
+      public:    false
 
----
+
+
 
 ## Task 1 — Install Dependencies
 
-```bash
-# Install Ansible
-sudo apt update -y
-sudo apt install ansible awscli python3-pip -y
+    
+    # Install Ansible
+    sudo apt update -y
+    sudo apt install ansible awscli python3-pip -y
+    
+    # Install boto3 — required by the amazon.aws collection
+    pip3 install boto3 botocore
+    
+    # Install the amazon.aws Ansible collection
+    ansible-galaxy collection install amazon.aws
+    
+    # Verify
+    ansible --version
+    python3 -c "import boto3; print(boto3.__version__)"
+    ansible-galaxy collection list | grep amazon
 
-# Install boto3 — required by the amazon.aws collection
-pip3 install boto3 botocore
 
-# Install the amazon.aws Ansible collection
-ansible-galaxy collection install amazon.aws
 
-# Verify
-ansible --version
-python3 -c "import boto3; print(boto3.__version__)"
-ansible-galaxy collection list | grep amazon
-```
-
----
 
 ## Task 2 — Configure AWS Credentials
 
-```bash
-aws configure
-# AWS Access Key ID:     your-access-key-id
-# AWS Secret Access Key: your-secret-access-key
-# Default region:        your-region
-# Output format:         json
 
-aws sts get-caller-identity
-# Confirms credentials are working
-```
+    aws configure
+    # AWS Access Key ID:     your-access-key-id
+    # AWS Secret Access Key: your-secret-access-key
+    # Default region:        your-region
+    # Output format:         json
+    
+    aws sts get-caller-identity
+    # Confirms credentials are working
 
----
+
+
 
 ## Task 3 — Update Playbook Variables
 
-Open `RDS.yaml` and update the CONFIG values:
+    Open `RDS.yaml` and update the CONFIG values:
+    
+    
+    region: "your-region"  # e.g. us-east-1
+    master_user_password: "your-strong-password"
 
-```yaml
-region: "your-region"              # e.g. us-east-1
-master_user_password: "your-strong-password"
-```
 
 Open `RDS-delete.yaml` and update:
 
