@@ -1,19 +1,25 @@
-# RDS-delete.yaml
-
 ---
-- name: Delete RDS instance
+# RDS-delete.yaml
+# Delete the RDS MySQL instance created by RDS.yaml
+
+- name: Delete RDS database instance
   hosts: localhost
   connection: local
   collections:
     - amazon.aws
 
   tasks:
+
     - name: Delete RDS instance
       amazon.aws.rds_instance:
         state: absent
+        # absent = delete the instance if it exists
         db_instance_identifier: "my-rds"
-        region: "us-east-1"
+        region: "your-region"
+        # Replace with the same region used in RDS.yaml
         skip_final_snapshot: true
-    - name: RDS deleted confirmation
+        # Do not create a final snapshot — avoids additional storage charges
+
+    - name: Confirm deletion
       debug:
-        msg: "RDS instance my-rds deleted!"
+        msg: "RDS instance my-rds has been deleted."
