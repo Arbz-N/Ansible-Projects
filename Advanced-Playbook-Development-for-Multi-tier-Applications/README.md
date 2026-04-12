@@ -104,60 +104,51 @@
     region: "your-region"  # e.g. us-east-1
     master_user_password: "your-strong-password"
 
+    Open `RDS-delete.yaml` and update:
+    region: "your-region"
 
-Open `RDS-delete.yaml` and update:
-
-```yaml
-region: "your-region"
-```
-
----
 
 ## Task 4 — Run the Playbook
 
-### Syntax check
+    ### Syntax check
+    
+    ansible-playbook RDS.yaml --syntax-check
+    # Expected: playbook: RDS.yaml
 
-```bash
-ansible-playbook RDS.yaml --syntax-check
-# Expected: playbook: RDS.yaml
-```
 
-### Dry run
+    ### Dry run
+    
+    ansible-playbook RDS.yaml --check
+    # Simulates the run without making any changes
 
-```bash
-ansible-playbook RDS.yaml --check
-# Simulates the run without making any changes
-```
+    
+    ### Create the RDS instance
+    
+    ansible-playbook RDS.yaml
+    # Takes 5–10 minutes to complete
 
-### Create the RDS instance
 
-```bash
-ansible-playbook RDS.yaml
-# Takes 5–10 minutes to complete
-```
+    Expected output:
+    
+    PLAY [Create RDS database instance]
+    
+    TASK [Gathering Facts]
+    ok: [localhost]
+    
+    TASK [Create RDS instance]
+    changed: [localhost]
+    
+    TASK [Print RDS endpoint]
+    ok: [localhost] => {
+        "msg": "RDS Endpoint: my-rds.xxxxx.your-region.rds.amazonaws.com"
+    }
+    
+    TASK [Wait for RDS instance to become available]
+    ok: [localhost]
+    
+    PLAY RECAP
+    localhost : ok=4  changed=1  unreachable=0  failed=0
 
-Expected output:
-
-```
-PLAY [Create RDS database instance]
-
-TASK [Gathering Facts]
-ok: [localhost]
-
-TASK [Create RDS instance]
-changed: [localhost]
-
-TASK [Print RDS endpoint]
-ok: [localhost] => {
-    "msg": "RDS Endpoint: my-rds.xxxxx.your-region.rds.amazonaws.com"
-}
-
-TASK [Wait for RDS instance to become available]
-ok: [localhost]
-
-PLAY RECAP
-localhost : ok=4  changed=1  unreachable=0  failed=0
-```
 
 ### Verify via AWS CLI
 
