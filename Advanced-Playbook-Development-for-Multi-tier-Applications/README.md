@@ -152,15 +152,15 @@
 
 ### Verify via AWS CLI
 
-```bash
-aws rds describe-db-instances \
-  --db-instance-identifier my-rds \
-  --region your-region \
-  --query 'DBInstances[0].{Status:DBInstanceStatus,Endpoint:Endpoint.Address,Engine:Engine,Class:DBInstanceClass}' \
-  --output table
-```
 
----
+    aws rds describe-db-instances \
+      --db-instance-identifier my-rds \
+      --region your-region \
+      --query 'DBInstances[0].{Status:DBInstanceStatus,Endpoint:Endpoint.Address,Engine:Engine,Class:DBInstanceClass}' \
+      --output table
+
+
+
 
 ## Key Concepts
 
