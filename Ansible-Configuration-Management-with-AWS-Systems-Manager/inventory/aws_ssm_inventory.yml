@@ -1,21 +1,41 @@
-plugin: amazon.aws.aws_ssm
-# Discover instances registered in AWS SSM Fleet Manager
+# hosts.aws_ec2.yml — Dynamic EC2 inventory for the SSM lab
+# CRITICAL: Filename must end in .aws_ec2.yml
+#           The plugin's verify_file() check rejects any other suffix.
+# Place at: ~/ansible-ssm-lab/inventory/hosts.aws_ec2.yml
+
+# ============================================================
+# CONFIG — replace placeholder values before use
+# ============================================================
+# your-region      : e.g. us-east-1
+# your-account-id  : 12-digit AWS account ID (no dashes)
+# ============================================================
+
+plugin: amazon.aws.aws_ec2
+# The aws_ssm inventory plugin was removed in recent versions.
+# Use amazon.aws.aws_ec2 instead — it supports all discovery use cases.
 
 regions:
   - your-region
-# Replace with your actual region (e.g. us-east-1)
 
 filters:
+  # Only pick up instances that have this tag and are currently running.
+  # web-server-01 and web-server-02 match (Environment=production).
+  # ansible-control-node does NOT have this tag, so it is excluded.
   tag:Environment: production
-# Only include instances tagged with Environment=production
-# web-server-01 and web-server-02 will be picked up
-# ansible-control-node is excluded (no Environment tag)
+  instance-state-name: running
 
 hostnames:
+  # Use the EC2 instance ID as the Ansible hostname.
+  # This is what the SSM connection plugin expects as the target identifier.
   - instance-id
-# Use the EC2 instance ID as the Ansible hostname
 
 compose:
-  ansible_host: instance_id
-  ansible_connection: aws_ssm
-# Connect via SSM — no SSH required
+  # Tell Ansible to use the SSM connection plugin instead of SSH.
+  ansible_connection: '"community.aws.aws_ssm"'
+
+  # Region must match where the instances are running.
+  ansible_aws_ssm_region: '"your-region"'
+
+  # The SSM connection plugin stages files through this S3 bucket.
+  # The bucket must exist before any playbook run.
+  ansible_aws_ssm_bucket_name: '"ansible-ssm-bucket-your-account-id"'
