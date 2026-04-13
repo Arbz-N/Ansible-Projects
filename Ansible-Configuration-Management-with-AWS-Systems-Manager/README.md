@@ -35,7 +35,7 @@
         Nginx installed      Nginx installed
         port 80 open         port 80 open
 
-## Project Structure:
+## Project Structure
 
     Ansible-Configuration-Management-with-AWS-Systems-Manager/
     |
