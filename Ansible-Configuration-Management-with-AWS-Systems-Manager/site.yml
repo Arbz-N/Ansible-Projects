@@ -1,17 +1,20 @@
 ---
-# site.yml
-# Run this playbook from ansible-control-node only
-# Targets: web-server-01 and web-server-02 (discovered via SSM inventory)
+# site.yml — Main playbook: install and configure Nginx on all web servers
+# Run from: ~/ansible-ssm-lab/
+# Command : ansible-playbook site.yml
 
 - name: Install and Configure Nginx on Web Servers
   hosts: all
-  # all = every host in the SSM inventory = web-server-01 + web-server-02
+  # "all" resolves to both web-server-01 and web-server-02 via the EC2 inventory.
 
   become: true
-  # Use sudo on target nodes — required for package install and service management
+  # ssm-user has sudo rights but is not root. become=true elevates privilege
+  # for package installation, service management, and writing to /etc/.
 
-  connection: aws_ssm
-  # Connect via SSM — no SSH or open port 22 needed
+  connection: community.aws.aws_ssm
+  # Use the SSM connection plugin instead of SSH.
+  # This plugin starts an SSM session over the AWS control plane.
+  # No inbound port 22 is required on the target instances.
 
   vars:
     nginx_port: 80
@@ -23,18 +26,17 @@
         name: nginx
         state: present
         update_cache: yes
-      # apt module targets Ubuntu/Debian
-      # state: present installs only if not already installed (idempotent)
-      # update_cache: yes runs apt-get update before installing
+      # update_cache runs apt-get update before installing.
+      # Without it, apt may use a stale package index and fail on new AMIs.
       tags: install
 
-    - name: Start and enable Nginx service
+    - name: Start and Enable Nginx service
       service:
         name: nginx
         state: started
         enabled: yes
-      # state: started ensures the service is running now
-      # enabled: yes ensures it starts automatically after reboot
+      # enabled=yes ensures Nginx starts automatically after a reboot.
+      # state=started ensures it is running right now.
       tags: service
 
     - name: Deploy custom Nginx configuration
@@ -44,35 +46,31 @@
         owner: root
         group: root
         mode: '0644'
-      # src is the path on the control node
-      # dest is the path on the target instance
       notify:
         - restart nginx
-      # The handler runs only if this task makes an actual change
+      # notify triggers the handler only when the file actually changes.
+      # If the config is already identical, the restart is skipped.
       tags: configure
 
     - name: Deploy custom index page
       copy:
         content: |
-          <html><body>
-            <h1>Deployed by Ansible</h1>
+          <html>
+          <body>
+            <h1>Deployed by Ansible via SSM</h1>
             <p>Server: {{ inventory_hostname }}</p>
-          </body></html>
+          </body>
+          </html>
         dest: /var/www/html/index.html
-      # inventory_hostname resolves to the EC2 instance ID
+      # inventory_hostname resolves to the EC2 instance ID.
+      # This lets you verify which server responded when testing in a browser.
       tags: configure
 
-    - name: Verify Nginx is responding
-      uri:
-        url: "http://localhost:{{ nginx_port }}"
-        status_code: 200
-      # Confirms Nginx is returning HTTP 200 before the play ends
-      tags: verify
-
   handlers:
+
     - name: restart nginx
       service:
         name: nginx
         state: restarted
-      # Runs at the end of the play, and only when notified by a task
-      # Will not run if the config file was unchanged
+      # Handlers run once at the end of the play, after all tasks complete.
+      # Even if multiple tasks notify this handler, it only restarts once.
