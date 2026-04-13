@@ -159,110 +159,27 @@
       --query 'DBInstances[0].{Status:DBInstanceStatus,Endpoint:Endpoint.Address,Engine:Engine,Class:DBInstanceClass}' \
       --output table
 
-
-
-
-## Key Concepts
-
-### `connection: local`
-
-This tells Ansible not to SSH anywhere. All tasks run on the local machine using the local Python environment and boto3 to call AWS APIs directly.
-
-### `state: present` and idempotency
-
-The `amazon.aws.rds_instance` module checks whether the instance already exists before attempting to create it. Running the playbook a second time when the instance is already `available` produces `ok=4 changed=0` — no duplicate resources are created.
-
-### `register` and `when`
-
-`register: rds_result` stores the full module output. The `wait_for` task uses `when: rds_result.endpoint is defined` to ensure it only runs if an endpoint was actually returned — for example, if the instance was freshly created rather than already existing.
-
-### Password security
-
-The password is stored in plain text in this lab playbook. In production, use **Ansible Vault** to encrypt sensitive values:
-
-```bash
-ansible-vault encrypt_string 'your-strong-password' --name 'master_user_password'
-```
-
----
-
-## Real Errors and Fixes
-
-### `ModuleNotFoundError: No module named 'boto3'`
-
-```
-Cause: boto3 not installed in the Python environment Ansible is using
-Fix:   pip3 install boto3 botocore
-       Confirm with: python3 -c "import boto3; print(boto3.__version__)"
-```
-
-### `amazon.aws.rds_instance module not found`
-
-```
-Cause: amazon.aws collection not installed
-Fix:   ansible-galaxy collection install amazon.aws
-```
-
-### `NoCredentialsError`
-
-```
-Cause: AWS credentials not configured
-Fix:   aws configure
-       Verify with: aws sts get-caller-identity
-```
-
-### `DBInstanceAlreadyExists`
-
-```
-Cause: An RDS instance with the same identifier already exists
-Fix:   This is expected on a second run — the module is idempotent
-       The task will report ok instead of changed — no action is needed
-```
-
-### `wait_for` times out after 300 seconds
-
-```
-Cause: RDS provisioning took longer than 5 minutes, or security group blocks port 3306
-Fix 1: Increase timeout value in RDS.yaml (e.g. timeout: 600)
-Fix 2: If publicly_accessible is false, the wait_for task cannot reach port 3306
-       from outside the VPC — remove or skip the wait_for task in that case
-```
-
----
-
 ## Cleanup
 
-### Delete via Ansible
+    Delete via AWS CLI
 
-```bash
-ansible-playbook RDS-delete.yaml
-```
-
-### Delete via AWS CLI
-
-```bash
-aws rds delete-db-instance \
-  --db-instance-identifier my-rds \
-  --skip-final-snapshot \
-  --region your-region
-
-# Check deletion status
-aws rds describe-db-instances \
-  --db-instance-identifier my-rds \
-  --region your-region \
-  --query 'DBInstances[0].DBInstanceStatus' \
-  --output text
-# Returns "deleting" then raises an error when fully removed
-```
-
-### Remove local files
-
-```bash
-rm -rf ~/ansible-lab
-```
-
----
+    aws rds delete-db-instance \
+      --db-instance-identifier my-rds \
+      --skip-final-snapshot \
+      --region your-region
+    
+    # Check deletion status
+    aws rds describe-db-instances \
+      --db-instance-identifier my-rds \
+      --region your-region \
+      --query 'DBInstances[0].DBInstanceStatus' \
+      --output text
+    # Returns "deleting" then raises an error when fully removed
+    
+    Remove local files
+    
+    rm -rf ~/ansible-lab
 
 ## License
 
-MIT License
+    MIT License
