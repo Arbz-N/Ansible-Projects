@@ -1,0 +1,41 @@
+---
+# deploy-webservers.yaml
+# Installs and starts Nginx on all instances in the tag_Role_webserver group.
+# The group is populated at runtime by aws-dynamic-inventory.py — any instance
+# tagged Role=webserver is automatically included.
+#
+# Usage:
+#   ansible-playbook -i /home/ubuntu/aws-dynamic-inventory.py deploy-webservers.yaml
+
+- name: Configure Web Servers
+  hosts: tag_Role_webserver
+  # Targets only instances tagged Role=webserver.
+  # Instances tagged Role=database are not affected.
+  become: yes
+  # apt and service require root. become=yes elevates via sudo.
+
+  tasks:
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+      # update_cache: yes runs apt-get update before installing.
+      # Skipping this on a fresh instance often causes "package not found" errors.
+
+    - name: Start and Enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+      # enabled: yes ensures Nginx restarts automatically after a reboot.
+
+    - name: Print host information
+      debug:
+        msg: >
+          Configured {{ inventory_hostname }}
+          in {{ hostvars[inventory_hostname]['region'] }}
+          ({{ hostvars[inventory_hostname]['instance_type'] }})
+      # inventory_hostname is the public IP (as set by the inventory script).
+      # hostvars values come from _meta.hostvars in the --list response.
