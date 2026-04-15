@@ -105,3 +105,33 @@ Task 2 — Launch 3 EC2 Instances
     
     [WARN] The Environment=production tag is how Ansible discovers target nodes.
     Missing this tag means the instance will not appear in inventory.
+
+Task 3 — Register Target Nodes in SSM Fleet Manager
+
+    Connect to each web server via EC2 Instance Connect.
+    
+    # Verify SSM Agent is running (Ubuntu 22.04 ships it pre-installed)
+    sudo systemctl status amazon-ssm-agent
+    
+    # If not running, install and start it
+    sudo snap install amazon-ssm-agent --classic
+    sudo systemctl start amazon-ssm-agent
+    sudo systemctl enable amazon-ssm-agent
+    
+    # Restart after IAM role changes (snap version requires snap restart)
+    sudo snap restart amazon-ssm-agent
+
+    Repeat on both web-server-01 and web-server-02.
+
+    Verify in Fleet Manager:
+
+    Go to Systems Manager > Fleet Manager. Both instances should show as Online.
+    If instances are not visible:
+    bash# Option A: Restart the SSM Agent (resolves most cases)
+    sudo snap restart amazon-ssm-agent
+    
+    # Option B: Create the DHMC Service Linked Role (if DHMC is enabled)
+    # Run from AWS CLI (local machine or control node after setup)
+    aws iam create-service-linked-role \
+      --aws-service-name ssm.amazonaws.com \
+      --region your-region
