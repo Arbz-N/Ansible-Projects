@@ -58,3 +58,50 @@ Architecture
         EC2 Service --> AnsibleTargetRole   (SSMManagedInstanceCore)
     
       No SSH. No key pairs. No inbound port 22.
+
+Step-by-Step Tasks
+
+Task 1 — Create IAM Roles
+
+    Go to IAM > Roles > Create Role in the AWS Console.
+    Role 1: AnsibleTargetRole (for web servers)
+
+    Trusted Entity : AWS Service -> EC2
+    Policy         : AmazonSSMManagedInstanceCore
+    Purpose        : Allows SSM Agent on the instance to register with AWS
+
+    Role 2: AnsibleControlRole (for the control node)
+    
+    Trusted Entity : AWS Service -> EC2
+    Policy 1       : AmazonSSMFullAccess       (to run SSM commands)
+    Policy 2       : AmazonEC2ReadOnlyAccess   (to list instances for inventory)
+
+Task 2 — Launch 3 EC2 Instances
+
+    Go to EC2 > Launch Instance (repeat 3 times).
+    
+    Instance 1: ansible-control-node
+    Name          : ansible-control-node
+    AMI           : Ubuntu Server 22.04 LTS
+    Instance Type : t2.micro
+    IAM Role      : AnsibleControlRole
+    Tags          : Name=ansible-control-node, Role=control
+    
+    Instance 2: web-server-01
+    Name          : web-server-01
+    AMI           : Ubuntu Server 22.04 LTS
+    Instance Type : t2.micro
+    IAM Role      : AnsibleTargetRole
+    Security Group: Allow port 80 (HTTP) inbound
+    Tags          : Name=web-server-01, Environment=production
+    
+    Instance 3: web-server-02
+    Name          : web-server-02
+    AMI           : Ubuntu Server 22.04 LTS
+    Instance Type : t2.micro
+    IAM Role      : AnsibleTargetRole
+    Security Group: Allow port 80 (HTTP) inbound
+    Tags          : Name=web-server-02, Environment=production
+    
+    [WARN] The Environment=production tag is how Ansible discovers target nodes.
+    Missing this tag means the instance will not appear in inventory.
