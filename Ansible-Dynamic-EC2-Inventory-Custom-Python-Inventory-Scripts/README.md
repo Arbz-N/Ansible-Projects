@@ -141,3 +141,18 @@ Task 3 — Register Target Nodes in SSM Fleet Manager
       --role-name AWSServiceRoleForAmazonSSM \
       --query 'Role.RoleName'
 
+
+    [INFO] DHMC (Default Host Management Configuration) is an AWS feature that
+    registers EC2 instances with SSM automatically. When enabled, it also requires
+    a service-linked role. Use Option B only if the IAM role is attached, the SSM
+    Agent is running, and the instance still does not appear in Fleet Manager.
+
+    Note the instance IDs (needed for inventory confirmation):
+        
+    # Run from the control node after AWS CLI is installed (Task 4)
+    aws ec2 describe-instances \
+      --filters "Name=tag:Environment,Values=production" \
+      --query 'Reservations[].Instances[].[InstanceId,Tags[?Key==`Name`].Value|[0]]' \
+      --output table
+
+
