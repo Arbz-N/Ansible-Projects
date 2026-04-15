@@ -24,3 +24,37 @@ Project Structure
     └── files/
         └── nginx.conf                   <- Custom Nginx configuration
 
+Prerequisites
+
+    Requirement             Details
+    AWS Account             IAM Admin access required
+    IAM Permissions         Ability to create roles and attach managed policies
+
+Architecture
+
+      +--------------------------+          AWS Systems Manager
+      |   ansible-control-node   |          (SSM Session Channel)
+      |                          |
+      |  - Ansible 2.16.x        |   SSM   +--------------------+
+      |  - amazon.aws 7.2.0      +-------->+   web-server-01    |
+      |  - community.aws 7.2.0   |         |   (AnsibleTarget)  |
+      |  - session-manager-plugin|         +--------------------+
+      |  - AnsibleControlRole    |
+      |    (SSMFullAccess +      |   SSM   +--------------------+
+      |     EC2ReadOnly)          +-------->+   web-server-02    |
+      +--------------------------+         |   (AnsibleTarget)  |
+                 |                         +--------------------+
+                 | aws ec2 describe-instances
+                 | (tag:Environment=production)
+                 v
+      +---------------------------+
+      |   S3 Bucket               |
+      |   ansible-ssm-bucket-*    |
+      |   (SSM file transfer)     |
+      +---------------------------+
+    
+      IAM Trust:
+        EC2 Service --> AnsibleControlRole  (SSMFullAccess + EC2ReadOnly)
+        EC2 Service --> AnsibleTargetRole   (SSMManagedInstanceCore)
+    
+      No SSH. No key pairs. No inbound port 22.
