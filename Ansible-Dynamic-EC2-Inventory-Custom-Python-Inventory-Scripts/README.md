@@ -155,4 +155,40 @@ Task 3 — Register Target Nodes in SSM Fleet Manager
       --query 'Reservations[].Instances[].[InstanceId,Tags[?Key==`Name`].Value|[0]]' \
       --output table
 
+Task 4 — Set Up the Control Node
+    
+    Connect to ansible-control-node via EC2 Instance Connect.
+
+
+    Step 4.1 — Install Ansible and dependencies
+    See setup-control-node.sh — run this script on the control node.
+
+
+    Step 4.2 — Install AWS Collections
+    # [WARN] Both collections are required. One alone is not sufficient.
+    
+    # Inventory plugin (discovers EC2 instances)
+    ansible-galaxy collection install amazon.aws:==7.2.0 --force
+    
+    # Connection plugin (SSM transport for Ansible)
+    ansible-galaxy collection install community.aws:==7.2.0
+    
+    # Verify both are installed at 7.2.0
+    ansible-galaxy collection list | grep -E "amazon|community"
+    
+    # Confirm the SSM connection plugin exists
+    find ~/.ansible/collections -name "aws_ssm.py" | grep connection
+
+
+    Step 4.3 — Install the Session Manager Plugin
+
+    curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" \
+      -o "/tmp/session-manager-plugin.deb"
+    
+    sudo dpkg -i /tmp/session-manager-plugin.deb
+    
+    session-manager-plugin --version
+
+
+
 
