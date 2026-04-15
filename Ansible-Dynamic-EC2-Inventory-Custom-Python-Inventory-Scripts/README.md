@@ -135,3 +135,9 @@ Task 3 — Register Target Nodes in SSM Fleet Manager
     aws iam create-service-linked-role \
       --aws-service-name ssm.amazonaws.com \
       --region your-region
+
+    # Confirm the role was created
+    aws iam get-role \
+      --role-name AWSServiceRoleForAmazonSSM \
+      --query 'Role.RoleName'
+
