@@ -13,3 +13,14 @@ Ansible with AWS SSM — Agentless Configuration Management
     Nginx installed and configured on two web servers from a single playbook run
     S3 bucket used as the SSM file-transfer channel
 
+Project Structure
+
+    Ansible-Dynamic-EC2-Inventory-Custom-Python-Inventory-Scripts/
+    ├── README.md                        <- This file
+    ├── ansible.cfg                      <- Ansible runtime configuration
+    ├── site.yml                         <- Main playbook
+    ├── inventory/
+    │   └── hosts.aws_ec2.yml            <- Dynamic EC2 inventory (tag-filtered)
+    └── files/
+        └── nginx.conf                   <- Custom Nginx configuration
+
