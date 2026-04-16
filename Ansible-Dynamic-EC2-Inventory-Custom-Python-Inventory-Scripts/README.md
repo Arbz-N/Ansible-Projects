@@ -328,4 +328,24 @@ Key Concepts
     control node and the target. The bucket must exist before running any playbook.
 
 
+Cleanup
 
+    Run all cleanup steps to stop incurring charges.
+    See cleanup.sh — run it from the control node before terminating instances.
+    After running cleanup.sh:
+    
+    Terminate all 3 EC2 instances via the AWS Console:
+    EC2 > Instances > select ansible-control-node, web-server-01,
+    web-server-02 > Instance State > Terminate Instance
+    
+    [WARN] Terminate, not Stop. Stopped instances still incur EBS storage charges.
+    
+    
+    Delete IAM roles — included in cleanup.sh.
+
+
+License
+
+    MIT License. This lab is for educational purposes.
+    Use placeholder values for all account IDs, regions, and resource identifiers
+    before sharing or committing this project.
