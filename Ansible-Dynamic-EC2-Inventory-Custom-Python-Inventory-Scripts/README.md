@@ -188,6 +188,37 @@ Task 4 — Set Up the Control Node
     sudo dpkg -i /tmp/session-manager-plugin.deb
     
     session-manager-plugin --version
+    
+    Step 4.4 — Verify SSM connectivity
+
+    aws ssm describe-instance-information \
+      --query 'InstanceInformationList[].[InstanceId,PingStatus,ComputerName]' \
+      --output table
+    # [OK] PingStatus should show "Online" for both web servers
+
+Task 5 — Create the Ansible Project
+
+    mkdir -p ~/ansible-ssm-lab/{inventory,files,roles}
+    cd ~/ansible-ssm-lab
+    
+    
+    Step 5.1 — Create ansible.cfg
+    See ansible.cfg — copy it to ~/ansible-ssm-lab/ansible.cfg.
+    
+    
+    Step 5.2 — Create an S3 bucket for SSM file transfer
+    # SSM uses S3 to transfer files between the control node and targets
+    aws s3 mb s3://ansible-ssm-bucket-your-account-id --region your-region
+    
+    # Confirm it was created
+    aws s3 ls | grep ansible-ssm
+    
+    
+    Step 5.3 — Create the inventory file
+    See hosts.aws_ec2.yml — copy it to ~/ansible-ssm-lab/inventory/hosts.aws_ec2.yml.
+    
+    [WARN] The filename must end in .aws_ec2.yml. The plugin's verify_file()
+    method rejects files that do not match this pattern.
 
 
 
