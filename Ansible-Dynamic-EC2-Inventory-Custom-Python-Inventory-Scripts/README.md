@@ -1,4 +1,4 @@
-Ansible with AWS SSM — Agentless Configuration Management:
+# Ansible with AWS SSM — Agentless Configuration Management:
 
     Overview
     This lab demonstrates how to use Ansible over AWS Systems Manager (SSM) to configure EC2 instances
@@ -13,7 +13,7 @@ Ansible with AWS SSM — Agentless Configuration Management:
     Nginx installed and configured on two web servers from a single playbook run
     S3 bucket used as the SSM file-transfer channel
 
-Project Structure:
+## Project Structure:
 
     Ansible-Dynamic-EC2-Inventory-Custom-Python-Inventory-Scripts/
     ├── README.md                        <- This file
@@ -24,13 +24,13 @@ Project Structure:
     └── files/
         └── nginx.conf                   <- Custom Nginx configuration
 
-Prerequisites:
+## Prerequisites:
 
     Requirement             Details
     AWS Account             IAM Admin access required
     IAM Permissions         Ability to create roles and attach managed policies
 
-Architecture:
+## Architecture:
 
       +--------------------------+          AWS Systems Manager
       |   ansible-control-node   |          (SSM Session Channel)
@@ -59,9 +59,9 @@ Architecture:
     
       No SSH. No key pairs. No inbound port 22.
 
-Step-by-Step Tasks:
+## Step-by-Step Tasks:
 
-Task 1 — Create IAM Roles:
+### Task 1 — Create IAM Roles:
 
     Go to IAM > Roles > Create Role in the AWS Console.
     Role 1: AnsibleTargetRole (for web servers)
@@ -76,7 +76,7 @@ Task 1 — Create IAM Roles:
     Policy 1       : AmazonSSMFullAccess       (to run SSM commands)
     Policy 2       : AmazonEC2ReadOnlyAccess   (to list instances for inventory)
 
-Task 2 — Launch 3 EC2 Instances:
+### Task 2 — Launch 3 EC2 Instances:
 
     Go to EC2 > Launch Instance (repeat 3 times).
     
@@ -106,7 +106,7 @@ Task 2 — Launch 3 EC2 Instances:
     [WARN] The Environment=production tag is how Ansible discovers target nodes.
     Missing this tag means the instance will not appear in inventory.
 
-Task 3 — Register Target Nodes in SSM Fleet Manager:
+### Task 3 — Register Target Nodes in SSM Fleet Manager:
 
     Connect to each web server via EC2 Instance Connect.
     
@@ -155,7 +155,7 @@ Task 3 — Register Target Nodes in SSM Fleet Manager:
       --query 'Reservations[].Instances[].[InstanceId,Tags[?Key==`Name`].Value|[0]]' \
       --output table
 
-Task 4 — Set Up the Control Node:
+### Task 4 — Set Up the Control Node:
     
     Connect to ansible-control-node via EC2 Instance Connect.
 
@@ -196,7 +196,7 @@ Task 4 — Set Up the Control Node:
       --output table
     # [OK] PingStatus should show "Online" for both web servers
 
-Task 5 — Create the Ansible Project:
+### Task 5 — Create the Ansible Project:
 
     mkdir -p ~/ansible-ssm-lab/{inventory,files,roles}
     cd ~/ansible-ssm-lab
@@ -229,7 +229,7 @@ Task 5 — Create the Ansible Project:
     ansible all -m ping
     # [OK] Both instances should return {"ping": "pong"}
 
-Task 6 — Create the Playbook:
+### Task 6 — Create the Playbook:
 
     Step 6.1 — Create nginx.conf
     See nginx.conf — copy it to ~/ansible-ssm-lab/files/nginx.conf.
@@ -241,7 +241,7 @@ Task 6 — Create the Playbook:
     ansible-playbook site.yml --syntax-check
     # [OK] Should print "playbook: site.yml" with no errors
 
-Task 7 — Run the Playbook:
+### Task 7 — Run the Playbook:
 
     # Dry run first — shows what will change without making changes
     ansible-playbook site.yml --check --diff
@@ -269,7 +269,7 @@ Task 7 — Run the Playbook:
     # Verbose output for debugging
     ansible-playbook site.yml -vvv
 
-Task 8 — Verify Deployment:
+### Task 8 — Verify Deployment:
 
     From the control node:
     
@@ -294,7 +294,7 @@ Task 8 — Verify Deployment:
     connection plugin issues AWS-RunShellScript commands. Successful runs appear
     with status Success and 2/2 targets.
 
-Key Concepts:
+### Key Concepts:
 
     Why SSM instead of SSH?
     SSM Session Manager creates an encrypted tunnel through the AWS control plane.
@@ -328,7 +328,7 @@ Key Concepts:
     control node and the target. The bucket must exist before running any playbook.
 
 
-Cleanup:
+### Cleanup:
 
     Run all cleanup steps to stop incurring charges.
     See cleanup.sh — run it from the control node before terminating instances.
@@ -344,7 +344,7 @@ Cleanup:
     Delete IAM roles — included in cleanup.sh.
 
 
-License
+### License:
 
     MIT License. This lab is for educational purposes.
     Use placeholder values for all account IDs, regions, and resource identifiers
