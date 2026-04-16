@@ -221,5 +221,82 @@ Task 5 — Create the Ansible Project
     method rejects files that do not match this pattern.
 
 
+    Step 5.4 — Test the inventory
+
+    ansible-inventory -i inventory/hosts.aws_ec2.yml --graph
+    # [OK] Both web server instance IDs should appear under @all
+    
+    ansible all -m ping
+    # [OK] Both instances should return {"ping": "pong"}
+
+Task 6 — Create the Playbook
+
+    Step 6.1 — Create nginx.conf
+    See nginx.conf — copy it to ~/ansible-ssm-lab/files/nginx.conf.
+
+
+    Step 6.2 — Create site.yml
+    See site.yml — copy it to ~/ansible-ssm-lab/site.yml.
+    bash# Validate the playbook syntax before running
+    ansible-playbook site.yml --syntax-check
+    # [OK] Should print "playbook: site.yml" with no errors
+
+Task 7 — Run the Playbook
+
+    # Dry run first — shows what will change without making changes
+    ansible-playbook site.yml --check --diff
+    
+    [WARN] During dry run, you may see:
+    "Could not find the requested service nginx: host"
+    This is expected. Nginx is not installed yet so the service module
+    cannot find it. The actual run will succeed.
+
+    # Full run — installs and configures Nginx on both web servers
+    ansible-playbook site.yml
+
+    Expected output:
+    PLAY RECAP -------------------------------------------------------
+    i-XXXXXXXXXXXXXXXXX : ok=5  changed=4  unreachable=0  failed=0
+    i-XXXXXXXXXXXXXXXXX : ok=5  changed=4  unreachable=0  failed=0
+    Targeted runs:
+
+    # Run against a single instance
+    ansible-playbook site.yml --limit "i-XXXXXXXXXXXXXXXXX"
+    
+    # Run only tasks tagged 'install'
+    ansible-playbook site.yml --tags install
+    
+    # Verbose output for debugging
+    ansible-playbook site.yml -vvv
+
+Task 8 — Verify Deployment
+
+    From the control node:
+    
+    # Check Nginx service status on both servers
+    ansible all -m command -a "systemctl status nginx"
+    
+    # Validate Nginx configuration syntax
+    ansible all -m command -a "nginx -t"
+    
+    # Confirm the deployed page is served
+    ansible all -m command -a "curl -s http://localhost"
+    # [OK] Should return the custom HTML page
+
+    From a browser:
+    http://web-server-01-PUBLIC-IP
+    http://web-server-02-PUBLIC-IP
+    
+    [WARN] Ensure port 80 is open in the Security Group attached to both web servers.
+    
+    From the AWS Console:
+    Go to Systems Manager > Run Command > Command History. Ansible's SSM
+    connection plugin issues AWS-RunShellScript commands. Successful runs appear
+    with status Success and 2/2 targets.
+
+
+
+
+
 
 
