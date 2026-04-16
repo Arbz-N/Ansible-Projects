@@ -294,9 +294,38 @@ Task 8 — Verify Deployment
     connection plugin issues AWS-RunShellScript commands. Successful runs appear
     with status Success and 2/2 targets.
 
+Key Concepts
 
-
-
+    Why SSM instead of SSH?
+    SSM Session Manager creates an encrypted tunnel through the AWS control plane.
+    No inbound ports need to be opened on target instances. The IAM role on the
+    instance grants the trust — not a network rule.
+    
+    Why two IAM roles?
+    The control node needs AmazonSSMFullAccess to issue Run Command calls and
+    AmazonEC2ReadOnlyAccess to describe instances for dynamic inventory. Target
+    nodes only need AmazonSSMManagedInstanceCore to register with SSM and receive
+    commands. Least-privilege separation.
+    
+    Why pin collections to 7.2.0?
+    amazon.aws 11.x dropped support for Ansible 2.16.x. The community.aws
+    collection provides the aws_ssm connection plugin — it is not in amazon.aws.
+    Both collections must be pinned together for compatibility.
+    
+    Why is the remote_user ssm-user and not ubuntu?
+    SSM Session Manager creates its own OS user (ssm-user) when it starts a
+    session. The ubuntu user only exists for SSH-based access. The remote_tmp
+    must also be under /tmp because ssm-user cannot write to /home/ubuntu.
+    
+    Why does the inventory filename matter?
+    The amazon.aws.aws_ec2 plugin's verify_file() method checks that the file
+    name ends with .aws_ec2.yml or .aws_ec2.yaml. Any other name causes the
+    plugin to silently skip the file, resulting in an empty inventory.
+    
+    What is the S3 bucket used for?
+    The community.aws.aws_ssm connection plugin uses S3 as a staging area to
+    transfer files (such as Ansible modules and the copy task payload) between the
+    control node and the target. The bucket must exist before running any playbook.
 
 
 
