@@ -10,7 +10,7 @@
 #   Example: Role=webserver  -> group: tag_Role_webserver
 #            Environment=prod -> group: tag_Environment_prod
 #
-# Usage:
+# Usage
 #   python3 aws-dynamic-inventory.py          (same as --list)
 #   ansible -i aws-dynamic-inventory.py all -m ping
 
