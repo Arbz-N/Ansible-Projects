@@ -1,57 +1,50 @@
-#!/bin/bash
-# cleanup.sh — Remove all lab resources to stop AWS charges
-# Run on : ansible-control-node (before terminating instances)
-# Usage  : bash cleanup.sh
+#!/usr/bin/env bash
+# cleanup.sh — Terminate all EC2 instances created in the lab
+# Run from: any machine with the AWS CLI configured
+# Usage   : bash cleanup.sh
 
 set -euo pipefail
 
 # ============================================================
 # CONFIG
 # ============================================================
-REGION="your-region"
-ACCOUNT_ID="your-account-id"
-S3_BUCKET="ansible-ssm-bucket-${ACCOUNT_ID}"
+REGION="your-region"   # e.g. us-east-1
 # ============================================================
 
-echo "[INFO] Step 1 — Removing Nginx from all target nodes via Ansible..."
-ansible all -m apt -a "name=nginx state=absent purge=yes" --become
-# purge=yes removes Nginx config files from /etc/nginx as well.
-# Without purge, configuration files are left behind even after uninstall.
+echo "[INFO] Finding instances tagged for this lab..."
 
-echo "[INFO] Step 2 — Deleting S3 bucket..."
-aws s3 rb "s3://${S3_BUCKET}" --force --region "${REGION}"
-# --force empties the bucket before deleting it.
-# Without --force, the delete fails if any objects remain in the bucket.
-echo "[OK] S3 bucket deleted: ${S3_BUCKET}"
+# Collect instance IDs for all instances tagged Environment=prod.
+# This matches both web-server-1 (Role=webserver) and db-server-1 (Role=database).
+INSTANCE_IDS=$(aws ec2 describe-instances \
+  --filters \
+    "Name=tag:Environment,Values=prod" \
+    "Name=instance-state-name,Values=running,stopped" \
+  --region "${REGION}" \
+  --query 'Reservations[].Instances[].InstanceId' \
+  --output text)
 
-echo "[INFO] Step 3 — Deleting lab files from control node..."
-rm -rf ~/ansible-ssm-lab
-echo "[OK] ~/ansible-ssm-lab removed"
+if [ -z "${INSTANCE_IDS}" ]; then
+  echo "[WARN] No instances found with tag Environment=prod in ${REGION}."
+  exit 0
+fi
 
-echo "[INFO] Step 4 — Detaching and deleting IAM roles..."
-
-# AnsibleTargetRole — web servers
-aws iam detach-role-policy \
-  --role-name AnsibleTargetRole \
-  --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-aws iam delete-role --role-name AnsibleTargetRole
-echo "[OK] AnsibleTargetRole deleted"
-
-# AnsibleControlRole — control node
-aws iam detach-role-policy \
-  --role-name AnsibleControlRole \
-  --policy-arn arn:aws:iam::aws:policy/AmazonSSMFullAccess
-aws iam detach-role-policy \
-  --role-name AnsibleControlRole \
-  --policy-arn arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
-aws iam delete-role --role-name AnsibleControlRole
-echo "[OK] AnsibleControlRole deleted"
-
+echo "[INFO] Instances to terminate:"
+echo "${INSTANCE_IDS}"
 echo ""
-echo "[OK] Cleanup complete."
-echo ""
-echo "[WARN] Manual step required — terminate all 3 EC2 instances in the AWS Console:"
-echo "       EC2 > Instances > select ansible-control-node, web-server-01, web-server-02"
-echo "       Instance State > Terminate Instance"
-echo ""
-echo "[INFO] Terminate (not Stop) to end EBS storage charges as well."
+
+read -rp "[WARN] This will permanently terminate the instances above. Continue? (yes/no): " CONFIRM
+if [ "${CONFIRM}" != "yes" ]; then
+  echo "[INFO] Cleanup cancelled."
+  exit 0
+fi
+
+echo "[INFO] Terminating instances..."
+aws ec2 terminate-instances \
+  --instance-ids ${INSTANCE_IDS} \
+  --region "${REGION}" \
+  --query 'TerminatingInstances[].[InstanceId,CurrentState.Name]' \
+  --output table
+
+echo "[OK] Termination initiated."
+echo "[INFO] Instances will reach 'terminated' state within a few minutes."
+echo "[INFO] Terminated instances no longer incur compute charges."
