@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # cleanup.sh — Remove all lab resources to stop AWS charges
 # Run on : ansible-control-node (before terminating instances)
 # Usage  : bash cleanup.sh
