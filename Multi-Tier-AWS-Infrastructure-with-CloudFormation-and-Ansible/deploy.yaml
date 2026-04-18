@@ -1,0 +1,52 @@
+---
+# deploy.yaml
+# Deploy the multi-tier CloudFormation stack using Ansible
+
+- name: Deploy CloudFormation stack
+  hosts: localhost
+  connection: local
+  # All tasks run locally — boto3 makes the AWS API calls
+
+  tasks:
+
+    - name: Create CloudFormation stack
+      amazon.aws.cloudformation:
+        stack_name: my-multi-tier-stack
+        # Unique name for the stack in your account
+
+        state: present
+        # present = create if it does not exist
+        # Idempotent — running again when stack is up-to-date makes no changes
+
+        region: "your-region"
+        # Replace with your actual region (e.g. us-east-1)
+
+        template: "/home/ubuntu/cloudformation-lab/ec2-template.yaml"
+        # Absolute path to the CloudFormation template on this machine
+
+        template_parameters:
+          KeyName: "your-key-pair"
+          EnvironmentType: "dev"
+          VpcId: "vpc-XXXXXXXXXXXXXXXXX"
+          AmiId: "ami-XXXXXXXXXXXXXXXXX"
+        # Values passed to the Parameters section of the template
+
+        tags:
+          Project: MultiTierLab
+          ManagedBy: Ansible
+
+        capabilities:
+          - CAPABILITY_IAM
+        # Required when the stack creates or modifies IAM resources
+
+      register: stack_output
+      # Save the full stack output to this variable
+
+    - name: Print all stack outputs
+      debug:
+        msg: "{{ stack_output.stack_outputs }}"
+
+    - name: Print web server public IP
+      debug:
+        msg: "Web Server IP: {{ stack_output.stack_outputs.WebServerPublicIP }}"
+      when: stack_output.stack_outputs is defined
