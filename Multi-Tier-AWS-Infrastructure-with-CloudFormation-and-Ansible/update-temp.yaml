@@ -1,0 +1,36 @@
+---
+# update-temp.yaml
+# Update an existing CloudFormation stack
+# CloudFormation detects what changed and applies only the diff
+
+- name: Update CloudFormation stack
+  hosts: localhost
+  connection: local
+
+  tasks:
+
+    - name: Update CloudFormation stack
+      amazon.aws.cloudformation:
+        stack_name: my-multi-tier-stack
+
+        state: present
+        # state: present on an existing stack triggers an update
+        # CloudFormation generates a changeset and applies it
+
+        region: "your-region"
+        # Replace with your actual region
+
+        template: "/home/ubuntu/cloudformation-lab/ec2-template.yaml"
+
+        template_parameters:
+          KeyName: "your-key-pair"
+          EnvironmentType: "prod"
+          # Changed from dev to prod — CloudFormation will detect this
+          VpcId: "vpc-XXXXXXXXXXXXXXXXX"
+          AmiId: "ami-XXXXXXXXXXXXXXXXX"
+
+      register: update_output
+
+    - name: Print update status
+      debug:
+        msg: "Stack updated. Status: {{ update_output.stack_status }}"
