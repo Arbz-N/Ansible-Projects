@@ -1,0 +1,21 @@
+---
+# delete-stack.yaml
+# Delete the CloudFormation stack and all resources it created
+
+- name: Delete CloudFormation stack
+  hosts: localhost
+  connection: local
+
+  tasks:
+
+    - name: Delete stack
+      amazon.aws.cloudformation:
+        stack_name: my-multi-tier-stack
+        state: absent
+        # absent = delete the stack and all associated resources
+        region: "your-region"
+        # Replace with your actual region
+
+    - name: Confirm deletion
+      debug:
+        msg: "Stack my-multi-tier-stack has been deleted."
