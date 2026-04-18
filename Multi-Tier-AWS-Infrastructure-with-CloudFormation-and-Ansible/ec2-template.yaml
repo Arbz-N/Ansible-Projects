@@ -1,0 +1,155 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Multi-tier application stack — Web, App, Database
+
+Parameters:
+
+  KeyName:
+    Type: String
+    Description: Name of an existing EC2 KeyPair for SSH access
+    Default: "your-key-pair"
+    # Replace with your actual key pair name
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair
+
+  EnvironmentType:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+    Description: Deployment environment
+
+  VpcId:
+    Type: String
+    Description: VPC ID where all resources will be created
+    Default: "vpc-XXXXXXXXXXXXXXXXX"
+    # Replace with your actual VPC ID
+
+  AmiId:
+    Type: String
+    Description: AMI ID for EC2 instances (Ubuntu 22.04 in your region)
+    Default: "ami-XXXXXXXXXXXXXXXXX"
+    # Replace with the correct Ubuntu 22.04 AMI for your region
+
+# ─────────────────────────────────────────────────────────────
+# RESOURCES
+# ─────────────────────────────────────────────────────────────
+Resources:
+
+  # ── WEB TIER ──────────────────────────────────────────────
+
+  WebServerSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Web server security group
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          # Allow inbound HTTP from anywhere
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          # Allow inbound HTTPS from anywhere
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+          # Allow SSH — restrict to your IP in production
+      Tags:
+        - Key: Name
+          Value: WebServer-SG
+        - Key: Environment
+          Value: !Ref EnvironmentType
+
+  WebServerInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: !Ref AmiId
+      InstanceType: t3.micro
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !Ref WebServerSecurityGroup
+      Tags:
+        - Key: Name
+          Value: WebServer
+        - Key: Role
+          Value: webserver
+        - Key: Environment
+          Value: !Ref EnvironmentType
+
+  # ── APP TIER ──────────────────────────────────────────────
+
+  AppServerSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: App server security group
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref WebServerSecurityGroup
+          # Only accept traffic from the web tier — not exposed publicly
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: AppServer-SG
+
+  AppServerInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: !Ref AmiId
+      InstanceType: t3.micro
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !Ref AppServerSecurityGroup
+      Tags:
+        - Key: Name
+          Value: AppServer
+        - Key: Role
+          Value: appserver
+
+  # ── DATABASE TIER ─────────────────────────────────────────
+
+  DBSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Database security group
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref AppServerSecurityGroup
+          # Only accept MySQL connections from the app tier
+      Tags:
+        - Key: Name
+          Value: DB-SG
+
+# ─────────────────────────────────────────────────────────────
+# OUTPUTS — values available after stack creation
+# ─────────────────────────────────────────────────────────────
+Outputs:
+
+  WebServerPublicIP:
+    Description: Public IP address of the web server
+    Value: !GetAtt WebServerInstance.PublicIp
+
+  WebServerPublicDNS:
+    Description: Public DNS name of the web server
+    Value: !GetAtt WebServerInstance.PublicDnsName
+
+  AppServerPrivateIP:
+    Description: Private IP address of the app server
+    Value: !GetAtt AppServerInstance.PrivateIp
+
+  StackName:
+    Description: Name of this CloudFormation stack
+    Value: !Ref 'AWS::StackName'
+    # AWS::StackName is a built-in pseudo parameter
