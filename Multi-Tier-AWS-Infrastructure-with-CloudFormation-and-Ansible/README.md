@@ -1,4 +1,4 @@
-Multi-Tier AWS Infrastructure with CloudFormation and Ansible
+# Multi-Tier AWS Infrastructure with CloudFormation and Ansible:
 
     Overview
     This project provisions a three-tier AWS infrastructure using a CloudFormation template managed by Ansible. The stack creates dedicated security groups and EC2 instances for a web tier, application tier, and database tier. Ansible playbooks handle creation, updates, and deletion.
@@ -10,7 +10,7 @@ Multi-Tier AWS Infrastructure with CloudFormation and Ansible
     Update playbook changes EnvironmentType from dev to prod as a practical example
     All sensitive values replaced with placeholders — ready to commit to version control
 
-Architecture:
+## Architecture:
 
     Internet
         |
@@ -28,7 +28,7 @@ Architecture:
     
     All resources in the same VPC (vpc-XXXXXXXXXXXXXXXXX)
 
-Project Structure:
+## Project Structure:
 
     Multi-Tier-AWS-Infrastructure-with-CloudFormation-and-Ansible/
     |
@@ -39,7 +39,7 @@ Project Structure:
     |
     |-- README.md
 
-Prerequisites:
+## Prerequisites:
     
     Requirement                 Check
 
@@ -55,7 +55,7 @@ Prerequisites:
     pip3 install boto3 botocore
     ansible-galaxy collection install amazon.aws
 
-Task 1 — Update Placeholder Values:
+### Task 1 — Update Placeholder Values:
 
     Before running any playbook, update these values in all four files:
     
@@ -66,7 +66,7 @@ Task 1 — Update Placeholder Values:
     vpc-XXXXXXXXXXXXXXXXX            Your VPC ID
     ami-XXXXXXXXXXXXXXXXX            Ubuntu 22.04 AMI for your region
 
-Task 2 — Validate the Template:
+### Task 2 — Validate the Template:
 
     mkdir ~/cloudformation-lab && cd ~/cloudformation-lab
     # Copy all files here
@@ -77,7 +77,7 @@ Task 2 — Validate the Template:
     
     # A successful response lists the Parameters — no output means an error
 
-Task 3 — Deploy the Stack:
+### Task 3 — Deploy the Stack:
     
     # Syntax check
     ansible-playbook deploy.yaml --syntax-check
@@ -112,14 +112,14 @@ Task 3 — Deploy the Stack:
       --query 'StackResources[*].{Type:ResourceType,ID:PhysicalResourceId,Status:ResourceStatus}' \
       --output table
 
-Task 4 — Update the Stack:
+### Task 4 — Update the Stack:
     
     ansible-playbook update-temp.yaml -v
     # Changes EnvironmentType from dev to prod
     # CloudFormation generates a changeset and applies only the diff
 
 
-Key Concepts:
+### Key Concepts:
 
     CloudFormation Parameters
     Parameters allow the same template to be reused across environments without modification. 
@@ -146,7 +146,7 @@ Key Concepts:
     Running update-temp.yaml when a parameter has changed triggers a CloudFormation changeset that modifies only the affected resources.
 
 
-Cleanup:
+### Cleanup:
 
     ansible-playbook delete-stack.yaml
     
@@ -162,7 +162,8 @@ Cleanup:
     Remove local files
     rm -rf ~/cloudformation-lab
 
-License:
-MIT License
+### License:
+
+    MIT License
 
 
