@@ -1,7 +1,9 @@
 # Secret Management with Ansible Vault and AWS Secrets Manager:
 
     Overview
-    This project demonstrates two complementary secret management approaches used together: Ansible Vault for encrypting secrets at rest in version control, and AWS Secrets Manager for centralized cloud-based secret storage. A playbook retrieves the AWS secret at runtime and combines it with values from the Vault-encrypted file to configure an application.
+    This project demonstrates two complementary secret management approaches used together: 
+    Ansible Vault for encrypting secrets at rest in version control, and AWS Secrets Manager for centralized cloud-based secret storage. 
+    A playbook retrieves the AWS secret at runtime and combines it with values from the Vault-encrypted file to configure an application.
     Key highlights:
     
     Ansible Vault creates AES256-encrypted YAML files — $ANSIBLE_VAULT;1.1;AES256 header confirms encryption
