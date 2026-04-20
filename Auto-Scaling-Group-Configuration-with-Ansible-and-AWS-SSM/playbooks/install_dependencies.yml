@@ -1,0 +1,40 @@
+---
+# install_dependencies.yml
+# Run from ansible-control-node to install required packages on all ASG instances
+
+- name: Install dependencies on ASG instances
+  hosts: all
+  become: true
+  connection: community.aws.aws_ssm
+
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      # cache_valid_time prevents re-running apt update within 1 hour
+
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - nginx
+        - python3
+        - python3-pip
+        - curl
+        - git
+        - unzip
+      register: result
+      retries: 3
+      delay: 10
+      until: result is succeeded
+      # Retry up to 3 times with 10-second delay — handles transient apt failures
+
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+      # enabled: yes ensures Nginx restarts automatically after a reboot
