@@ -1,4 +1,4 @@
- Auto Scaling Group Configuration with Ansible and AWS SSM
+#  Auto Scaling Group Configuration with Ansible and AWS SSM
  
 
     Overview
@@ -12,7 +12,7 @@
     SNS topic receives lifecycle hook notifications
     All playbooks use connection: community.aws.aws_ssm — no SSH required
 
-Project Structure:
+## Project Structure:
 
     Auto-Scaling-Group-Configuration-with-Ansible-and-AWS-SSM/
     |
@@ -29,14 +29,14 @@ Project Structure:
     |
     |-- README.md
 
-Prerequisites:
+## Prerequisites:
 
     - ansible-control-node running with AnsibleControlRole IAM role
     - Ansible, boto3, amazon.aws and community.aws collections installed
     - AWS CLI configured
     - A VPC with at least two subnets in different Availability Zones
 
-Architecture:
+## Architecture:
 
     CloudWatch Alarm (CPU > 70%)
             |
@@ -59,7 +59,7 @@ Architecture:
             v
     ASG Scale-In → instance terminated
 
-Task 1 — Attach IAM Policies:
+### Task 1 — Attach IAM Policies:
 
     Add to AnsibleControlRole:
     
@@ -71,7 +71,7 @@ Task 1 — Attach IAM Policies:
     
         AmazonSSMManagedInstanceCore — allows ASG-launched instances to register with SSM
 
-Task 2 — Create Launch Template:
+### Task 2 — Create Launch Template:
 
     EC2 → Launch Templates → Create launch template
     
@@ -101,7 +101,7 @@ Task 2 — Create Launch Template:
     aws ec2 authorize-security-group-ingress \
       --group-id $SG_ID --protocol tcp --port 22 --cidr 0.0.0.0/0
 
-Task 3 — Create Auto Scaling Group:
+### Task 3 — Create Auto Scaling Group:
 
       ┌──────────────────────────────────────────────────────────┐
       │  Step 1 — Choose Launch Template:                        │
@@ -124,7 +124,7 @@ Task 3 — Create Auto Scaling Group:
       │    Key: ManagedBy,   Value: Ansible                      │
       └──────────────────────────────────────────────────────────┘
 
-Task 4 — Create Scaling Policies and CloudWatch Alarms:
+### Task 4 — Create Scaling Policies and CloudWatch Alarms:
 
     # Scale-out policy (add 1 instance)
     SCALE_OUT_ARN=$(aws autoscaling put-scaling-policy \
@@ -172,7 +172,7 @@ Task 4 — Create Scaling Policies and CloudWatch Alarms:
       --evaluation-periods 2 \
       --alarm-actions $SCALE_IN_ARN
 
-Task 5 — Create Lifecycle Hook:
+### Task 5 — Create Lifecycle Hook:
 
     SNS_ARN=$(aws sns create-topic \
       --name "asg-lifecycle-topic" \
@@ -190,7 +190,7 @@ Task 5 — Create Lifecycle Hook:
       --default-result "ABANDON"
     # ABANDON = if the hook times out without CONTINUE, instance is terminated
 
-Task 6 — Set Up Ansible Project:
+### Task 6 — Set Up Ansible Project:
 
     mkdir -p ~/ansible-asg-lab/{inventory,playbooks}
     cd ~/ansible-asg-lab
@@ -201,7 +201,7 @@ Task 6 — Set Up Ansible Project:
     your-region → your AWS region
     your-account-id → your 12-digit account ID
 
-Task 7 — Run Playbooks:
+### Task 7 — Run Playbooks:
 
     Verify ASG instances are registered in SSM
 
@@ -237,7 +237,7 @@ Task 7 — Run Playbooks:
       --auto-scaling-group-name "ansible-web-asg" \
       --desired-capacity 3
 
-Task 8 — Verify:
+### Task 8 — Verify:
 
     # ASG status
     aws autoscaling describe-auto-scaling-groups \
@@ -254,7 +254,7 @@ Task 8 — Verify:
     # Config file present
     ansible all -m command -a "cat /etc/app.env"
 
-Key Concepts:
+### Key Concepts:
 
     Lifecycle Hook
     A lifecycle hook pauses a new instance in Pending:Wait state. 
@@ -271,7 +271,7 @@ Key Concepts:
     Without it, a burst of CPU activity could trigger multiple scale-out events in rapid succession before the first new instance has time to absorb load.
 
 
-Cleanup:
+### Cleanup:
 
     # Delete ASG — terminates all running instances
     aws autoscaling delete-auto-scaling-group \
@@ -297,6 +297,6 @@ Cleanup:
 
     Terminate ansible-control-node via the EC2 console.
 
-License:
+### License:
 
     MIT License
