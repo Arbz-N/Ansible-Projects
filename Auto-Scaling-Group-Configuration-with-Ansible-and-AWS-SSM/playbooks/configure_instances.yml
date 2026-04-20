@@ -1,0 +1,46 @@
+---
+# configure_instances.yml
+# Deploy custom index page and application config to all ASG instances
+
+- name: Configure ASG instances
+  hosts: all
+  become: true
+  connection: community.aws.aws_ssm
+
+  vars:
+    app_port: 80
+    instance_id: "{{ inventory_hostname }}"
+    # inventory_hostname resolves to the EC2 instance ID
+
+  tasks:
+
+    - name: Deploy custom index page
+      copy:
+        content: |
+          <html>
+          <body>
+            <h1>ASG Instance — Auto Configured</h1>
+            <p>Instance ID   : {{ instance_id }}</p>
+            <p>Managed By    : Ansible</p>
+            <p>Configured At : {{ ansible_date_time.iso8601 }}</p>
+          </body>
+          </html>
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: Create application configuration file
+      copy:
+        content: |
+          INSTANCE_ID={{ instance_id }}
+          APP_PORT={{ app_port }}
+          ENVIRONMENT=production
+          CONFIGURED_BY=ansible
+        dest: /etc/app.env
+        mode: '0644'
+
+    - name: Ensure Nginx is running
+      service:
+        name: nginx
+        state: restarted
