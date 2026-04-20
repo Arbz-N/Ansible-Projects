@@ -1,0 +1,34 @@
+---
+# complete_lifecycle.yml
+# Complete the ASG lifecycle hook to move the instance into InService state
+# Run after install_dependencies.yml and configure_instances.yml succeed
+#
+# Usage:
+#   ansible-playbook complete_lifecycle.yml \
+#     --extra-vars "target_instance_id=i-0abc123456789"
+
+- name: Complete ASG lifecycle hook
+  hosts: localhost
+  # Runs on the control node only — not on the target instance
+  gather_facts: false
+
+  vars:
+    asg_name: "ansible-web-asg"
+    hook_name: "ansible-launch-hook"
+    region: "your-region"
+    # Replace with your actual region
+    instance_id: "{{ target_instance_id }}"
+    # Passed via --extra-vars at runtime
+
+  tasks:
+
+    - name: Complete lifecycle action — move instance to InService
+      command: >
+        aws autoscaling complete-lifecycle-action
+        --lifecycle-hook-name {{ hook_name }}
+        --auto-scaling-group-name {{ asg_name }}
+        --instance-id {{ instance_id }}
+        --lifecycle-action-result CONTINUE
+        --region {{ region }}
+      # CONTINUE = instance enters InService and starts receiving traffic
+      # ABANDON  = instance is terminated
