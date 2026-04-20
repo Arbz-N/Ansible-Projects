@@ -1,0 +1,21 @@
+plugin: amazon.aws.aws_ec2
+
+regions:
+  - your-region
+# Replace with your actual region (e.g. us-east-1)
+
+filters:
+  tag:Environment: production
+  tag:ManagedBy: Ansible
+  instance-state-name: running
+# Only include running instances tagged with both Environment=production and ManagedBy=Ansible
+
+hostnames:
+  - instance-id
+# Use EC2 instance ID as the Ansible hostname
+
+compose:
+  ansible_connection: '"community.aws.aws_ssm"'
+  ansible_aws_ssm_region: '"your-region"'
+  ansible_aws_ssm_bucket_name: '"ansible-ssm-bucket-your-account-id"'
+# Replace your-region and your-account-id with actual values
