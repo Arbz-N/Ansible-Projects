@@ -1,0 +1,46 @@
+---
+# aws_config_setup.yaml
+# Enable AWS Config for continuous compliance monitoring
+
+- name: Configure AWS Config
+  hosts: localhost
+  gather_facts: false
+  connection: local
+
+  vars:
+    region: "your-region"
+    # Replace with your actual region (e.g. us-east-1)
+    config_role_arn: "arn:aws:iam::your-account-id:role/AWSConfigRole"
+    # Replace your-account-id with your 12-digit AWS account ID
+
+  tasks:
+
+    - name: Create S3 bucket for AWS Config logs
+      amazon.aws.s3_bucket:
+        name: "aws-config-logs-{{ ansible_date_time.epoch }}"
+        state: present
+        region: "{{ region }}"
+      register: config_bucket
+      # Bucket name includes epoch timestamp to ensure global uniqueness
+
+    - name: Enable AWS Config Recorder
+      amazon.aws.aws_config_recorder:
+        name: "default"
+        state: present
+        role_arn: "{{ config_role_arn }}"
+        recording_group:
+          all_supported: true
+          include_global_resource_types: true
+          # all_supported = record all supported resource types
+          # include_global = include IAM, CloudFront and other global resources
+
+    - name: Set up Config delivery channel
+      amazon.aws.aws_config_delivery_channel:
+        name: "default"
+        state: present
+        s3_bucket: "{{ config_bucket.name }}"
+        # Config snapshots and history are delivered to this S3 bucket
+
+    - name: Config setup complete
+      debug:
+        msg: "AWS Config enabled. Logs will be delivered to: {{ config_bucket.name }}"
