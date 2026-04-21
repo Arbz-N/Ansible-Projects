@@ -1,0 +1,79 @@
+---
+# roles/security_hardening/tasks/main.yml
+# Security hardening tasks — run via site.yaml
+
+# ── Step 1: Update packages ──────────────────────────────
+- name: Update and upgrade all packages
+  apt:
+    update_cache: yes
+    upgrade: dist
+  # upgrade: dist applies full distribution-level upgrades including security patches
+
+# ── Step 2: Firewall ─────────────────────────────────────
+- name: Install UFW firewall
+  apt:
+    name: ufw
+    state: present
+
+- name: Allow required ports through the firewall
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    state: enabled
+  with_items: "{{ allowed_ports }}"
+  # Iterates over allowed_ports defined in defaults/main.yml
+
+- name: Enable UFW with default deny policy
+  ufw:
+    state: enabled
+    policy: deny
+  # Default deny blocks all traffic except the explicitly allowed ports
+
+# ── Step 3: SSH hardening ─────────────────────────────────
+- name: Harden SSH configuration
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#?{{ item.key }}"
+    line: "{{ item.key }} {{ item.value }}"
+    state: present
+  with_items:
+    - { key: "PermitRootLogin",        value: "{{ ssh_permit_root_login }}" }
+    - { key: "PasswordAuthentication", value: "{{ ssh_password_authentication }}" }
+    - { key: "MaxAuthTries",           value: "{{ ssh_max_auth_tries }}" }
+    - { key: "X11Forwarding",          value: "no" }
+    - { key: "AllowTcpForwarding",     value: "no" }
+  notify: Restart SSH
+  # The handler triggers an SSH restart only when this task makes a change
+
+# ── Step 4: Disable unused filesystems ───────────────────
+- name: Disable unused filesystem modules
+  lineinfile:
+    path: /etc/modprobe.d/disable-filesystems.conf
+    line: "install {{ item }} /bin/true"
+    create: yes
+  with_items: "{{ disable_unused_filesystems }}"
+  # install MODULE /bin/true prevents the kernel from loading the module
+
+# ── Step 5: Audit logging ─────────────────────────────────
+- name: Install auditd
+  apt:
+    name: auditd
+    state: present
+
+- name: Start and enable auditd service
+  service:
+    name: auditd
+    state: started
+    enabled: yes
+  # enabled: yes ensures auditd starts automatically after reboot
+
+# ── Step 6: Remove insecure packages ─────────────────────
+- name: Remove insecure packages
+  apt:
+    name:
+      - telnet
+      - rsh-client
+      - talk
+    state: absent
+    purge: yes
+  # Removes packages and their configuration files
