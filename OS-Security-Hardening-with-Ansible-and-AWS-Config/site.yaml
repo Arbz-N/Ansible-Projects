@@ -1,0 +1,13 @@
+---
+# site.yaml
+# Main security hardening playbook
+# Applies the security_hardening role to all_servers
+
+- name: Security hardening
+  hosts: all_servers
+  become: true
+  # become: true uses sudo — required to modify system files and install packages
+
+  roles:
+    - security_hardening
+    # Ansible automatically runs roles/security_hardening/tasks/main.yml
