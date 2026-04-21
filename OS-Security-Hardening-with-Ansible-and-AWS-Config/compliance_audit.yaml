@@ -1,0 +1,90 @@
+---
+# compliance_audit.yaml
+# Run compliance checks on target servers and print a summary report
+
+- name: Run compliance audits
+  hosts: all_servers
+  become: true
+
+  tasks:
+
+    # ── SSH: Root login ───────────────────────────────────
+    - name: Check SSH — PermitRootLogin disabled
+      shell: grep -E "^PermitRootLogin\s+no" /etc/ssh/sshd_config
+      register: ssh_root_check
+      ignore_errors: yes
+      changed_when: false
+      # ignore_errors: yes prevents the play from stopping on a failed grep
+      # changed_when: false ensures this task never reports changed
+
+    - name: Report SSH root login status
+      debug:
+        msg: >-
+          {% if ssh_root_check.rc == 0 %}
+          [PASS] Root login is disabled
+          {% else %}
+          [FAIL] Root login is allowed
+          {% endif %}
+
+    # ── Firewall ──────────────────────────────────────────
+    - name: Check UFW firewall status
+      shell: ufw status | grep -i "Status: active"
+      register: ufw_check
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Report firewall status
+      debug:
+        msg: >-
+          {% if ufw_check.rc == 0 %}
+          [PASS] Firewall is active
+          {% else %}
+          [FAIL] Firewall is inactive
+          {% endif %}
+
+    # ── SSH: Password authentication ─────────────────────
+    - name: Check SSH — PasswordAuthentication disabled
+      shell: grep -E "^PasswordAuthentication\s+no" /etc/ssh/sshd_config
+      register: ssh_pass_check
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Report password authentication status
+      debug:
+        msg: >-
+          {% if ssh_pass_check.rc == 0 %}
+          [PASS] Password authentication is disabled
+          {% else %}
+          [FAIL] Password authentication is allowed
+          {% endif %}
+
+    # ── Audit logging ─────────────────────────────────────
+    - name: Check auditd running
+      shell: systemctl is-active auditd
+      register: auditd_check
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Report audit logging status
+      debug:
+        msg: >-
+          {% if auditd_check.rc == 0 %}
+          [PASS] Audit logging is active
+          {% else %}
+          [FAIL] Audit logging is inactive
+          {% endif %}
+
+    # ── Summary ───────────────────────────────────────────
+    - name: Compliance summary report
+      debug:
+        msg: |
+          ============================================
+          COMPLIANCE AUDIT REPORT
+          Host : {{ inventory_hostname }}
+          Date : {{ ansible_date_time.date }}
+          ============================================
+          SSH Root Login Disabled : {{ 'PASS' if ssh_root_check.rc == 0 else 'FAIL' }}
+          Firewall Active         : {{ 'PASS' if ufw_check.rc == 0 else 'FAIL' }}
+          Password Auth Disabled  : {{ 'PASS' if ssh_pass_check.rc == 0 else 'FAIL' }}
+          Audit Logging Active    : {{ 'PASS' if auditd_check.rc == 0 else 'FAIL' }}
+          ============================================
