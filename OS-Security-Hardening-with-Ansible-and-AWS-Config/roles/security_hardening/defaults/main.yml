@@ -1,0 +1,23 @@
+---
+# roles/security_hardening/defaults/main.yml
+# Default variables for the security hardening role
+# Override these in group_vars or host_vars as needed
+
+# Ports the firewall will allow inbound
+allowed_ports:
+  - "22"    # SSH
+  - "80"    # HTTP
+  - "443"   # HTTPS
+
+# SSH hardening settings
+ssh_permit_root_login: "no"
+ssh_password_authentication: "no"
+ssh_max_auth_tries: 3
+
+# Kernel modules to disable at boot
+disable_unused_filesystems:
+  - cramfs
+  - freevxfs
+  - jffs2
+  - hfs
+  - hfsplus
