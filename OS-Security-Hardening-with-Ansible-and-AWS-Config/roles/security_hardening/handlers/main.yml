@@ -1,0 +1,10 @@
+---
+# roles/security_hardening/handlers/main.yml
+# Handlers run at the end of the play, only when notified
+
+- name: Restart SSH
+  service:
+    name: sshd
+    state: restarted
+  # Triggered by the SSH hardening task when sshd_config changes
+  # Runs once at the end of the play — not immediately after each notifying task
