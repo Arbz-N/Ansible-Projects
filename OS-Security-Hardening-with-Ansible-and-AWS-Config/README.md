@@ -1,4 +1,4 @@
-OS Security Hardening with Ansible and AWS Config
+# OS Security Hardening with Ansible and AWS Config
 
     Overview
     This project applies CIS-aligned security hardening to Ubuntu servers using an Ansible role,
