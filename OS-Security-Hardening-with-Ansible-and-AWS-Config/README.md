@@ -1,4 +1,4 @@
-# OS Security Hardening with Ansible and AWS Config
+# OS Security Hardening with Ansible and AWS Config:
 
     Overview
     This project applies CIS-aligned security hardening to Ubuntu servers using an Ansible role,
@@ -15,7 +15,7 @@
     AWS Config enabled with an S3 delivery channel for compliance history
     Compliance audit playbook produces a [PASS]/[FAIL] report per host
 
-Project Structure
+## Project Structure:
 
     OS-Security-Hardening-with-Ansible-and-AWS-Config/
     |
@@ -36,7 +36,7 @@ Project Structure
     |
     |-- README.md
 
-Prerequisites:
+## Prerequisites:
 
     Requirement            Check
     
@@ -50,7 +50,7 @@ Prerequisites:
     pip install boto3
     ansible-galaxy collection install amazon.aws community.general
 
-Architecture:
+## Architecture:
 
     Ansible Control Node
             |
@@ -76,14 +76,14 @@ Architecture:
       |-- Delivery Channel → S3 bucket
       |-- Continuous compliance history
 
-Task 1 — Update Inventory
+### Task 1 — Update Inventory:
     
     Open inventory.ini and replace:
         
         YOUR_NODE_IP with the actual IP address of your target node
         your-key.pem with the actual path to your SSH private key
 
-Task 2 — Create IAM Role for AWS Config:
+### Task 2 — Create IAM Role for AWS Config:
 
     aws iam create-role \
       --role-name AWSConfigRole \
@@ -98,7 +98,7 @@ Task 2 — Create IAM Role for AWS Config:
       --query 'Role.Arn' --output text)
     echo "Config Role ARN: $CONFIG_ROLE_ARN"
 
-Task 3 — Run the Hardening Playbook:
+### Task 3 — Run the Hardening Playbook:
 
     cd ~/ansible_project
     
@@ -122,11 +122,11 @@ Task 3 — Run the Hardening Playbook:
     PLAY RECAP
     node1 : ok=8  changed=6  unreachable=0  failed=0
 
-Task 4 — Enable AWS Config:
+### Task 4 — Enable AWS Config:
     
     ansible-playbook aws_config_setup.yaml -v
 
-Task 5 — Run Compliance Audit:
+### Task 5 — Run Compliance Audit:
 
     # Print report to screen
     ansible-playbook -i inventory.ini compliance_audit.yaml
@@ -148,7 +148,7 @@ Task 5 — Run Compliance Audit:
     Audit Logging Active    : PASS
     ============================================
 
-Key Concepts:
+### Key Concepts:
 
     Ansible Role Structure
     A role separates concerns into standard directories. 
@@ -169,7 +169,7 @@ Key Concepts:
     The S3 bucket receives configuration snapshots and change history. 
     AWS Config can trigger AWS Lambda or SNS when a resource drifts from its expected state — enabling automated remediation.
 
-Cleanup:
+### Cleanup:
 
     # Disable and delete AWS Config
     aws configservice stop-configuration-recorder \
@@ -189,6 +189,6 @@ Cleanup:
     rm -rf ~/ansible_project
     rm -f config-trust-policy.json compliance-report-*.txt
 
-License:
+### License:
 
     MIT License
