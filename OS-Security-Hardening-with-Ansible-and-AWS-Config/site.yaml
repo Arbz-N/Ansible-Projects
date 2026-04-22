@@ -10,4 +10,4 @@
 
   roles:
     - security_hardening
-    # Ansible automatically runs roles/security_hardening/tasks/main.ym
+    # Ansible automatically runs roles/security_hardening/tasks/main.yml
