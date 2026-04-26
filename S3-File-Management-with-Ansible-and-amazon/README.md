@@ -1,7 +1,9 @@
 #  S3 File Management with Ansible and amazon.aws:
  
     Overview
-    This project demonstrates managing AWS S3 objects using Ansible and the amazon.aws.s3_object module. Files are uploaded to an S3 bucket via the AWS CLI, then downloaded to the control node using two Ansible playbooks — one for a specific list of files and one for the entire bucket.
+    This project demonstrates managing AWS S3 objects using Ansible and the amazon.aws.s3_object module. 
+    Files are uploaded to an S3 bucket via the AWS CLI, 
+    then downloaded to the control node using two Ansible playbooks — one for a specific list of files and one for the entire bucket.
     Key highlights:
     
     All playbooks run on localhost with connection: local — no target EC2 instance required
