@@ -1,0 +1,52 @@
+---
+# download_all_from_s3.yml
+# List all objects in an S3 bucket and download every one of them
+
+- name: Download all files from S3 bucket
+  hosts: localhost
+  gather_facts: false
+  connection: local
+
+  vars:
+    s3_bucket_name: "your-bucket-name"
+    # Replace with your actual bucket name
+    local_dest: "/tmp/s3-full-download"
+    aws_region: "your-region"
+
+  tasks:
+
+    - name: Create local download subdirectories
+      file:
+        path: "{{ local_dest }}/{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - configs
+        - scripts
+        - data
+
+    - name: List all objects in S3 bucket
+      amazon.aws.s3_object:
+        bucket: "{{ s3_bucket_name }}"
+        mode: list
+        region: "{{ aws_region }}"
+      register: s3_contents
+      # s3_contents.s3_keys contains the list of all object keys
+
+    - name: Show bucket contents
+      debug:
+        msg: "Objects found in bucket: {{ s3_contents.s3_keys }}"
+
+    - name: Download all files from S3
+      amazon.aws.s3_object:
+        bucket: "{{ s3_bucket_name }}"
+        object: "{{ item }}"
+        dest: "{{ local_dest }}/{{ item }}"
+        mode: get
+        region: "{{ aws_region }}"
+      loop: "{{ s3_contents.s3_keys }}"
+      # Loops over every key returned by the list task
+
+    - name: Download summary
+      debug:
+        msg: "{{ s3_contents.s3_keys | length }} file(s) downloaded to {{ local_dest }}"
