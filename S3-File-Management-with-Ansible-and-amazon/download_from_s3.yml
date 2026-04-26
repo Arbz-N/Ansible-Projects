@@ -1,0 +1,64 @@
+---
+# download_from_s3.yml
+# Download specific files from S3 to the control node
+# Runs on localhost — no SSH or target instance required
+
+- name: Download specific files from AWS S3
+  hosts: localhost
+  gather_facts: false
+  connection: local
+
+  vars:
+    s3_bucket_name: "your-bucket-name"
+    # Replace with your actual bucket name (e.g. my-ansible-lab-123456789012)
+    local_dest: "/tmp/downloads"
+    aws_region: "your-region"
+
+    # List of files to download
+    s3_files:
+      - s3_key: "configs/app.conf"
+        local_file: "app.conf"
+      - s3_key: "scripts/deploy.sh"
+        local_file: "deploy.sh"
+      - s3_key: "data/sample.txt"
+        local_file: "sample.txt"
+
+  tasks:
+
+    - name: Create local download directory
+      file:
+        path: "{{ local_dest }}"
+        state: directory
+        mode: '0755'
+
+    - name: Download files from S3
+      amazon.aws.s3_object:
+        bucket: "{{ s3_bucket_name }}"
+        object: "{{ item.s3_key }}"
+        dest: "{{ local_dest }}/{{ item.local_file }}"
+        mode: get
+        region: "{{ aws_region }}"
+      loop: "{{ s3_files }}"
+      # Iterates over the s3_files list — one download per item
+
+    - name: List downloaded files
+      command: ls -lh "{{ local_dest }}"
+      register: downloaded_files
+      changed_when: false
+
+    - name: Show downloaded files
+      debug:
+        msg: "{{ downloaded_files.stdout_lines }}"
+
+    - name: Show app.conf content
+      command: cat "{{ local_dest }}/app.conf"
+      register: app_conf_content
+      changed_when: false
+
+    - name: Display app.conf
+      debug:
+        var: app_conf_content.stdout_lines
+
+    - name: Download complete
+      debug:
+        msg: "All files downloaded to: {{ local_dest }}"
